@@ -7,7 +7,13 @@ version '1.0'
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
+    compile ('net.dv8tion:JDA:4.2.0_227') {
+        exclude module: 'opus-java'
+    }
+    implementation 'ch.qos.logback:logback-classic:1.2.3'
+
 }

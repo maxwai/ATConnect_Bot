@@ -24,3 +24,7 @@ hs_err_pid*
 /.gradle/
 /.idea/
 /gradle/
+/out/
+/build/
+Token.cfg
+Roles.cfg
