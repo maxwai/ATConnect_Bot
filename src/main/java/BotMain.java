@@ -65,6 +65,7 @@ public class BotMain {
         jda = jdaBuilder.build();
         try {
             jda.awaitReady();
+            Countdowns.restartCountdowns(jda);
         } catch (InterruptedException ignored) {
         }
     }

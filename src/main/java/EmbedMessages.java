@@ -14,7 +14,7 @@ public class EmbedMessages {
 
         eb.setDescription("List off all known Commands");
 
-        eb.addField("!help", "shows this page", false);
+        eb.addField("`!help`", "shows this page", false);
 
         eb.setTimestamp(Instant.now());
 
@@ -32,9 +32,9 @@ public class EmbedMessages {
 
         eb.addField("Admin Commands", "Commands that are only for admins:", false);
 
-        eb.addField("!restart", "restarts the bot", true);
+        eb.addField("`!restart`", "restarts the bot", true);
         //eb.addField("!stop", "stops the bot", true);
-        eb.addField("!reload", "reloads all config files", true);
+        eb.addField("`!reload`", "reloads all config files", true);
     }
 
     public static void getEventOrganizer(EmbedBuilder eb) {
@@ -44,10 +44,10 @@ public class EmbedMessages {
 
         eb.addField("Event Organizer Commands", "Commands that are only for event organizers", false);
 
-        eb.addField("!countdown", """
+        eb.addField("`!countdown`", """
                 adds a countdown to the next event in the welcome channel
                 Syntax:
-                !countdown DD.MM.YYYY HH:mm <additional Text>
+                `!countdown DD.MM.YYYY HH:mm <additional Text>`
                 The time is always in UTC""", false);
     }
 }

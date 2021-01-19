@@ -14,14 +14,15 @@ public class BotEvents {
 
     @SubscribeEvent
     public void onEmoteAdded(GuildMessageReactionAddEvent event) {
+        if(event.getUser().isBot()) return; // don't react if the bot is adding this emote
         event.retrieveMessage().queue(message -> {
-            if (!message.getAuthor().isBot()) return;
+            if(!message.getAuthor().isBot()) return; //delete only bot messages
             if(event.getReactionEmote().isEmoji()) {
                 String emoji = event.getReactionEmote().getEmoji();
                 if (emoji.substring(0, emoji.length() - 1).equals("\uD83D\uDDD1")) { // :wastebasket:
                     LoggerFactory.getLogger("ReactionAdded").info("deleting message because of :wastebasket: reaction");
-                    if(Countdowns.messageIds.contains(message.getIdLong())) {
-                        Countdowns.closeSpecificThread(message.getIdLong());
+                    if(Countdowns.messageIds.contains(message.getId())) {
+                        Countdowns.closeSpecificThread(message.getId());
                     }
                     message.delete().queue();
                 }
@@ -67,7 +68,7 @@ public class BotEvents {
                         message.editMessageFormat("Pong: %d ms", System.currentTimeMillis() - time).queue());
                 }
                 case "countdown" -> {
-                    if (isEventOrganizer) {
+                    if (isEventOrganizer || isOwner) {
                         Countdowns.startNewCountdown(event);
                     } else
                         channel.sendMessage("You don't have permission for this command").queue();
