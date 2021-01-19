@@ -9,10 +9,23 @@ import java.util.Stack;
 
 public class Config {
 
+    /**
+     * The File name of the TOKEN Config file
+     */
     private static final String TOKEN_FILE_NAME = "Token.cfg";
+    /**
+     * The File name of the ROLES Config file
+     */
     private static final String ROLES_FILE_NAME = "Roles.cfg";
+    /**
+     * The File name where the Countdowns are saved
+     */
     private static final String COUNTDOWN_FILE_NAME = "Countdowns.cfg";
 
+    /**
+     * Get the Token of the Bot.
+     * @return The Token of the Bot
+     */
     public static String getToken() {
         Logger logger = LoggerFactory.getLogger("TokenGrabber");
         String token = "";
@@ -21,7 +34,7 @@ public class Config {
             if (tokenFile.createNewFile()) {
                 logger.warn("Created " + TOKEN_FILE_NAME + " at " + tokenFile.getAbsolutePath());
                 logger.error("No Token available. Add Token in " + TOKEN_FILE_NAME);
-                throw new RuntimeException("No Token available");
+                throw new RuntimeException("No Token available"); // finish the Program since no Token present
             }
             BufferedReader reader = new BufferedReader(new FileReader(tokenFile));
             token = reader.readLine();
@@ -34,6 +47,10 @@ public class Config {
         return token;
     }
 
+    /**
+     * Get the Role IDs of the important Roles
+     * @return Map with all IDs
+     */
     public static Map<String, Long> getRoles() {
         Logger logger = LoggerFactory.getLogger("RolesGrabber");
         Map<String, Long> roles = new HashMap<>();
@@ -42,7 +59,7 @@ public class Config {
             if (rolesFile.createNewFile()) {
                 logger.warn("Created " + ROLES_FILE_NAME + " at " + rolesFile.getAbsolutePath());
                 logger.error("No Roles available. Add Roles in " + ROLES_FILE_NAME);
-                throw new RuntimeException("No Roles available");
+                throw new RuntimeException("No Roles available"); // finish the Program since no Roles present
             }
             BufferedReader reader = new BufferedReader(new FileReader(rolesFile));
             String line = reader.readLine();
@@ -59,6 +76,10 @@ public class Config {
         return roles;
     }
 
+    /**
+     * Get the saved Countdowns
+     * @return ArrayList with the String Arrays with the informations
+     */
     public static ArrayList<String[]> getCountdowns() {
         Logger logger = LoggerFactory.getLogger("CountdownGrabber");
         ArrayList<String[]> countdowns = new ArrayList<>();
@@ -83,6 +104,10 @@ public class Config {
         return countdowns;
     }
 
+    /**
+     * Save the Countdowns
+     * @param countdowns The Infos of the Countdowns
+     */
     public static void saveCountdowns(Stack<Countdowns.CountdownsThread> countdowns) {
         Logger logger = LoggerFactory.getLogger("CountdownSaver");
         try {

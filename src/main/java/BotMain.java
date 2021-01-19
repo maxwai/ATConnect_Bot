@@ -4,20 +4,38 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.hooks.AnnotatedEventManager;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-import org.slf4j.LoggerFactory;
 
 import javax.security.auth.login.LoginException;
 import java.util.Map;
 
 public class BotMain {
 
+    /**
+     * Token of the Bot, Fetch with the Token.cfg file
+     */
     public static String TOKEN = Config.getToken();
+    /**
+     * Map of special Role IDs:
+     * Admin, Owner, Event Organizer
+     */
     public static Map<String, Long> ROLES = Config.getRoles();
 
+    /**
+     * The IDs for when the Bot is restarted to know which Message to edit
+     */
     public static final long[] restartIDs = new long[2];
+    /**
+     * Lock for the {@link #restartIDs}
+     */
     public static final Object lock = new Object();
 
+    /**
+     * {@link JDA} Instance of the Bot
+     */
     private static JDA jda;
+    /**
+     * {@link JDABuilder} for the Bot
+     */
     private static JDABuilder jdaBuilder;
 
     public static void main(String[] args) throws LoginException {
@@ -25,6 +43,9 @@ public class BotMain {
         connectBot();
     }
 
+    /**
+     * Will setup the JDA Builder with the necessary settings
+     */
     private static void initializeJDABuilder() {
         jdaBuilder = JDABuilder.createDefault(TOKEN)
                 .setEventManager(new AnnotatedEventManager())
@@ -34,11 +55,17 @@ public class BotMain {
                 .enableIntents(GatewayIntent.GUILD_MESSAGE_REACTIONS);
     }
 
+    /**
+     * Will reload the Configs (without the Countdowns)
+     */
     public static void reloadConfig() {
         TOKEN = Config.getToken();
         ROLES = Config.getRoles();
     }
 
+    /**
+     * Will restart the Bot
+     */
     public static void restartBot(){
         disconnectBot();
         try {
@@ -61,6 +88,10 @@ public class BotMain {
         }
     }
 
+    /**
+     * Connect to the Bot and load the Countdowns
+     * @throws LoginException if the TOKEN of the Bot is wrong
+     */
     private static void connectBot() throws LoginException {
         jda = jdaBuilder.build();
         try {
@@ -70,6 +101,9 @@ public class BotMain {
         }
     }
 
+    /**
+     * Will disconnect the Bot and save the Countdowns
+     */
     public static void disconnectBot() {
         Countdowns.closeAllThreads();
         jda.getRegisteredListeners().forEach(jda::removeEventListener);

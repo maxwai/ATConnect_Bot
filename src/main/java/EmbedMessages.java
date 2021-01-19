@@ -5,6 +5,10 @@ import java.time.Instant;
 
 public class EmbedMessages {
 
+    /**
+     * Build the basic Help Page
+     * @return The Basic Help Page, still needs to be Build
+     */
     public static EmbedBuilder getHelpPage() {
         EmbedBuilder eb = new EmbedBuilder();
 
@@ -21,6 +25,10 @@ public class EmbedMessages {
         return eb;
     }
 
+    /**
+     * Adds the Admin Portion to the Help page
+     * @param eb the already pre-build Help Page
+     */
     public static void getAdminHelpPage(EmbedBuilder eb) {
         StringBuilder desc = eb.getDescriptionBuilder();
         if(desc.toString().contains("with commands for"))
@@ -37,6 +45,10 @@ public class EmbedMessages {
         eb.addField("`!reload`", "reloads all config files", true);
     }
 
+    /**
+     * Adds the Event Organizer Portion to the Help Page
+     * @param eb the already pre-build Help Page
+     */
     public static void getEventOrganizer(EmbedBuilder eb) {
         eb.setDescription(eb.getDescriptionBuilder().append(" with commands for Event Organizers"));
 
