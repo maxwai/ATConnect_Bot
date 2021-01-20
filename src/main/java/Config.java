@@ -159,17 +159,17 @@ public class Config {
     }
 
     public static void saveTimezones(Map<Long, Integer> timezones) {
-        Logger logger = LoggerFactory.getLogger("CountdownSaver");
+        Logger logger = LoggerFactory.getLogger("TimezoneSaver");
         try {
-            File countdownFile = new File(COUNTDOWN_FILE_NAME);
+            File countdownFile = new File(TIMEZONE_FILE_NAME);
             PrintWriter writer = new PrintWriter(countdownFile);
-            timezones.forEach((user, timezone) -> writer.write(user + "=" + timezone));
+            timezones.forEach((user, timezone) -> writer.write(user + "=" + timezone + "\n"));
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
         }
-        logger.info("Saved Countdowns");
+        logger.info("Saved Timezones");
     }
 
 }

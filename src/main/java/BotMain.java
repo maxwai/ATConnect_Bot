@@ -1,9 +1,12 @@
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.hooks.AnnotatedEventManager;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.ChunkingFilter;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
 import javax.security.auth.login.LoginException;
 import java.util.Map;
@@ -52,7 +55,8 @@ public class BotMain {
                 .addEventListeners(new BotEvents())
                 .setActivity(Activity.listening("!help"))
                 .disableIntents(GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_MESSAGE_TYPING)
-                .enableIntents(GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_MEMBERS);
+                .enableIntents(GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_MEMBERS)
+                .setMemberCachePolicy(MemberCachePolicy.ALL);
     }
 
     /**
@@ -97,6 +101,10 @@ public class BotMain {
         try {
             jda.awaitReady();
             Countdowns.restartCountdowns(jda);
+            Guild guild = jda.getGuildById(ROLES.get("Guild"));
+            if(guild != null)
+                guild.loadMembers().onSuccess(members -> {});
+            Timezones.loadTimezones();
         } catch (InterruptedException ignored) {
         }
     }
@@ -106,6 +114,7 @@ public class BotMain {
      */
     public static void disconnectBot() {
         Countdowns.closeAllThreads();
+        Timezones.saveTimezones();
         jda.getRegisteredListeners().forEach(jda::removeEventListener);
         jda.shutdown();
     }

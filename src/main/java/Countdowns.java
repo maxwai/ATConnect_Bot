@@ -63,12 +63,8 @@ public class Countdowns {
 
             // Check if the time is not in th past
             if(date.getEpochSecond() < Instant.now().getEpochSecond()) {
-                channel.sendMessage("You tried making a countdown in the past. (Message will delete after 10 sec)").queue(message -> {
-                    try {
-                        Thread.sleep(10000);
-                    } catch (InterruptedException ignored) {}
-                    message.delete().queue(); // delete the Message after 10 sec
-                });
+                channel.sendMessage("You tried making a countdown in the past. (Message will delete after 10 sec)")
+                        .queue(message -> BotEvents.deleteMessageAfterXTime(message, 10));
                 logger.warn("User tried making a countdown in the past");
                 return;
             }
@@ -81,7 +77,6 @@ public class Countdowns {
             channel.sendMessage("Something went wrong with your command try again\n" +
                     "Format is: `!countdown DD.MM.YYYY HH:mm <additional Text>`").queue();
         }
-
     }
 
     /**
@@ -97,7 +92,7 @@ public class Countdowns {
                     Instant date = Instant.parse(countdownInfos[3]);
                     if(date.getEpochSecond() < Instant.now().getEpochSecond()) { // check if the Countdown is in the past
                         message.editMessage("Countdown finished").queue();
-                        message.addReaction("\uD83D\uDDD1").queue(); // add a reaction to make it easy to delete the post
+                        BotEvents.addTrashcan(message); // add a reaction to make it easy to delete the post
                     } else {
                         logger.info("Added Countdown Thread from existing Countdown");
                         CountdownsThread countdownsThread =
@@ -232,7 +227,7 @@ public class Countdowns {
                 if(info[0] instanceof Boolean) { // if this countdown is at it's end
                     logger.info("Countdown finished removing it from the Threads List");
                     channel.editMessageById(messageId, "Countdown finished")
-                            .queue(message -> message.addReaction("\uD83D\uDDD1").queue(), // add a reaction to make it easy to delete the post
+                            .queue(BotEvents::addTrashcan, // add a reaction to make it easy to delete the post
                                     throwable -> logger.warn("Removing one Countdown where Message is deleted")); // Message was deleted, don't do anything here
                     countdowns.remove(this);
                     return;

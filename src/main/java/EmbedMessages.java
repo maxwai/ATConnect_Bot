@@ -42,7 +42,10 @@ public class EmbedMessages {
 
         eb.addField("`!restart`", "restarts the bot", true);
         //eb.addField("!stop", "stops the bot", true);
-        eb.addField("`!reload`", "reloads all config files", true);
+        eb.addField("`!reload XY`", """
+                reloads all config files
+                Following arguments are available:
+                `config`, `timezones`""", true);
     }
 
     /**
