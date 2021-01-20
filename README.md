@@ -11,7 +11,9 @@ The source code for the ATConnect Bot
 ### Prerequisites
 
 You will need Java Version 15 or later to make it work.
-It may work with lower Java versions, but it was programmed using the Java 15 JDK. <br>
+It may work with lower Java versions, but it was programmed using the Java 15 JDK.
+
+This Bot isa supposed to be running on only one Server at a Time.
 
 ### Installing
 
@@ -23,6 +25,7 @@ and you will be asked to fill them):
   * Admin=\<ID of the Admin Role>
   * Owner=\<ID of the Owner Role>
   * Event_Organizer=\<ID of the Event_Organizer Role>
+  * Guild=\<ID of the Guild>
 
 ### How to Use
 

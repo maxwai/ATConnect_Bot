@@ -2,6 +2,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class BotEvents {
 
@@ -32,6 +34,34 @@ public class BotEvents {
                 }
             }
         });
+    }
+
+    /**
+     * Is triggered when the Nickname of a User is changed
+     * @param event Nickname Update Event
+     */
+    @SubscribeEvent
+    public void onNicknameChanged(GuildMemberUpdateNicknameEvent event) {
+        String newNick = event.getNewNickname();
+        if(!event.getUser().isBot() && // User should not be a Bot
+                newNick != null &&
+                newNick.toLowerCase(Locale.ROOT).contains("[z") &&
+                !newNick.toLowerCase(Locale.ROOT).contains("[alt")) { // User should not be an Alt account
+            String newOffset = newNick.toLowerCase(Locale.ROOT).substring(newNick.indexOf("[z"));
+            String oldNick = event.getOldNickname();
+            if(oldNick != null) {
+                String oldOffset = oldNick.toLowerCase(Locale.ROOT).substring(oldNick.indexOf("[z"));
+                if(!newOffset.equals(oldOffset)) {
+                    if(!Timezones.updateSpecificTimezone(event.getUser().getIdLong(), newOffset)) {
+                        LoggerFactory.getLogger("NicknameChanged").error("Could not save Timezone of User: " + newNick);
+                    }
+                }
+            } else {
+                if(!Timezones.updateSpecificTimezone(event.getUser().getIdLong(), newOffset)) {
+                    LoggerFactory.getLogger("NicknameChanged").error("Could not save Timezone of User: " + newNick);
+                }
+            }
+        }
     }
 
     /**

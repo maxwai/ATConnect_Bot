@@ -52,7 +52,7 @@ public class BotMain {
                 .addEventListeners(new BotEvents())
                 .setActivity(Activity.listening("!help"))
                 .disableIntents(GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_MESSAGE_TYPING)
-                .enableIntents(GatewayIntent.GUILD_MESSAGE_REACTIONS);
+                .enableIntents(GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_MEMBERS);
     }
 
     /**
