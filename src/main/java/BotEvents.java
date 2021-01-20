@@ -23,16 +23,22 @@ public class BotEvents {
     @SubscribeEvent
     public void onEmoteAdded(GuildMessageReactionAddEvent event) {
         if(event.getUser().isBot()) return; // don't react if the bot is adding this emote
-        event.retrieveMessage().queue(message -> {
-            if(!message.getAuthor().isBot()) return; // delete only bot messages
-            if(event.getReactionEmote().isEmoji()) {
-                String emoji = event.getReactionEmote().getEmoji();
-                if (emoji.substring(0, emoji.length() - 1).equals("\uD83D\uDDD1") || emoji.equals("\uD83D\uDDD1")) { // :wastebasket:
-                    LoggerFactory.getLogger("ReactionAdded").info("deleting message because of :wastebasket: reaction");
-                    if(Countdowns.messageIds.contains(message.getId())) {
-                        Countdowns.closeSpecificThread(message.getId());
+        Member authorMember = event.getGuild().getMember(event.getUser());
+        List<Role> rolesOfUser = authorMember != null ? authorMember.getRoles() : new ArrayList<>();
+        boolean isAdmin = rolesOfUser.contains(event.getGuild().getRoleById(BotMain.ROLES.get("Admin"))) ||
+                event.getUser().getIdLong() == BotMain.ROLES.get("Owner");
+        event.retrieveMessage().queue(message -> { // only do something if he is admin or the wastebasket was already here
+            if(isAdmin || message.getReactions().get(0).isSelf()) {
+                if (!message.getAuthor().isBot()) return; // delete only bot messages
+                if (event.getReactionEmote().isEmoji()) {
+                    String emoji = event.getReactionEmote().getEmoji();
+                    if (emoji.substring(0, emoji.length() - 1).equals("\uD83D\uDDD1") || emoji.equals("\uD83D\uDDD1")) { // :wastebasket:
+                        LoggerFactory.getLogger("ReactionAdded").info("deleting message because of :wastebasket: reaction");
+                        if (Countdowns.messageIds.contains(message.getId())) {
+                            Countdowns.closeSpecificThread(message.getId());
+                        }
+                        message.delete().queue();
                     }
-                    message.delete().queue();
                 }
             }
         });
@@ -79,6 +85,7 @@ public class BotEvents {
     @SubscribeEvent
     public void onReceiveMessage(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
+        Logger logger = LoggerFactory.getLogger("ReceivedMessage");
         String content = event.getMessage().getContentRaw().toLowerCase(Locale.ROOT);
         MessageChannel channel = event.getChannel();
 
@@ -97,7 +104,7 @@ public class BotEvents {
         isAdmin = isAdmin || isOwner; // Owner is also admin
 
         if (content.length() != 0 && content.charAt(0) == '!') {
-            LoggerFactory.getLogger("ReceivedMessage").info("Received Message from " + event.getAuthor().getName() + ": " + content);
+            logger.info("Received Message from " + event.getAuthor().getName() + ": " + content);
             String command;
             content = content.substring(1);
             if(content.indexOf(' ') != -1)
@@ -117,6 +124,51 @@ public class BotEvents {
                     long time = System.currentTimeMillis();
                     channel.sendMessage("Pong!").queue(message ->
                         message.editMessageFormat("Pong: %d ms", System.currentTimeMillis() - time).queue());
+                }
+                case "time" -> {
+                    if(content.length() != 4) {
+                        content = content.substring(5);
+                        ArrayList<Long> members = new ArrayList<>();
+                        StringBuilder output = new StringBuilder("```\n");
+                        while(!content.equals("")) {
+                            if(content.charAt(0) == '<') {
+                                members.add(Long.valueOf(content.substring(3, content.indexOf(">"))));
+                                content = content.substring(content.indexOf(">") + 1);
+                            } else {
+                                final String name;
+                                if(content.contains(",")) {
+                                    name = content.substring(0, content.indexOf(',')).toLowerCase(Locale.ROOT);
+                                    content = content.substring(content.indexOf(',') + 1);
+                                } else {
+                                    name = content.toLowerCase(Locale.ROOT);
+                                    content = "";
+                                }
+                                final int size = members.size();
+                                event.getGuild().getMembers().forEach(member -> {
+                                    if(size == members.size()) {
+                                        String serverName = getServerName(member).toLowerCase(Locale.ROOT);
+                                        if (!serverName.contains("[alt")) {
+                                            if (serverName.contains(name)) {
+                                                members.add(member.getIdLong());
+                                            }
+                                        }
+                                    }
+                                });
+                                if(size == members.size()) {
+                                    String error = "Could not find User: " + name;
+                                    logger.warn(error);
+                                    output.append(error).append("\n");
+                                }
+                            }
+                            if(content.length() != 0 && content.charAt(0) == ' ')
+                                content = content.substring(1);
+                        }
+                        members.forEach(memberID -> output.append(Timezones.printUserLocalTime(memberID, event.getGuild())).append("\n"));
+                        event.getChannel().sendMessage(output.append("```").toString()).queue();
+                    }
+                }
+                case "timezones" -> {
+                    channel.sendMessage(Timezones.printAllUsers(event.getGuild())).queue();
                 }
                 case "countdown" -> { // create a live countdown
                     if (isEventOrganizer || isOwner) {
@@ -144,13 +196,13 @@ public class BotEvents {
                                     .queue(message -> deleteMessageAfterXTime(message, 10));
                         } else {
                             content = content.substring(7);
-                            // Reload Config files
                             switch (content) {
-                                case "config" -> channel.sendMessage("reloading Config").queue(message -> {
-                                    BotMain.reloadConfig();
-                                    message.editMessage("Config reloaded successfully").queue();
-                                });
-                                case "timezones", "timezone" -> // reload Timezones
+                                case "config" -> // Reload Config files
+                                        channel.sendMessage("reloading Config").queue(message -> {
+                                            BotMain.reloadConfig();
+                                            message.editMessage("Config reloaded successfully").queue();
+                                        });
+                                case "timezones", "timezone" -> // Reload Timezones
                                         channel.sendMessage("reloading all user Timezones").queue(message -> {
                                             Timezones.updateTimezones(event.getJDA());
                                             message.editMessage("Timezones reloaded").queue();
@@ -159,6 +211,16 @@ public class BotEvents {
                                         .queue(message -> deleteMessageAfterXTime(message, 10));
                             }
                         }
+                    } else
+                        channel.sendMessage("You don't have permission for this command").queue();
+                }
+                case "purge" -> {
+                    if(isOwner) {
+                        int size = 1 + Integer.parseInt(content.substring(6)); // add 1 since the command should not count
+                        event.getChannel().getIterableHistory().takeAsync(size).thenAccept(channel::purgeMessages)
+                                .thenAccept(unused -> event.getChannel().sendMessage((size - 1) + " Messages Purged")
+                                        .queue(BotEvents::addTrashcan));
+
                     } else
                         channel.sendMessage("You don't have permission for this command").queue();
                 }
@@ -182,6 +244,13 @@ public class BotEvents {
             Thread.sleep(seconds * 1000);
         } catch (InterruptedException ignored) {}
         message.delete().queue(); // delete the Message after X sec
+    }
+
+    public static String getServerName(Member member) {
+        String nickname = member.getNickname();
+        if(nickname == null)
+            nickname = member.getEffectiveName();
+        return nickname;
     }
 
 }

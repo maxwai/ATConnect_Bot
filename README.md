@@ -36,7 +36,8 @@ and you will be asked to fill them):
 ## TODO
 
 - [X] Countdown functionality that carries on after restart
-- [ ] Timezone functionality to know the timezone / current local time of a user
+- [X] Purge function for Admin
+- [X] Timezone functionality to know the timezone / current local time of a user
 - [ ] Event functionality where users can choose their position
 
 ## License [![GitHub license](https://badgen.net/github/license/maxwai/ATConnect_Bot)](LICENSE)

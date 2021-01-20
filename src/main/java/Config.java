@@ -133,9 +133,9 @@ public class Config {
      * Get the User Timezones
      * @return Map with the Timezones of the Users
      */
-    public static Map<Long, Integer> getTimezones() {
+    public static Map<Long, String> getTimezones() {
         Logger logger = LoggerFactory.getLogger("CountdownGrabber");
-        Map<Long, Integer> timezones = new HashMap<>();
+        Map<Long, String> timezones = new HashMap<>();
         try {
             File timezoneFile = new File(TIMEZONE_FILE_NAME);
             if (timezoneFile.exists()) {
@@ -143,7 +143,7 @@ public class Config {
                 String line = reader.readLine();
                 while (line != null) {
                     timezones.put(Long.valueOf(line.substring(0, line.indexOf('='))),
-                            Integer.valueOf(line.substring(line.indexOf('=') + 1)));
+                            line.substring(line.indexOf('=') + 1));
                     line = reader.readLine();
                 }
                 reader.close();
@@ -158,7 +158,7 @@ public class Config {
         return timezones;
     }
 
-    public static void saveTimezones(Map<Long, Integer> timezones) {
+    public static void saveTimezones(Map<Long, String> timezones) {
         Logger logger = LoggerFactory.getLogger("TimezoneSaver");
         try {
             File countdownFile = new File(TIMEZONE_FILE_NAME);
