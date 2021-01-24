@@ -37,11 +37,34 @@ public class EmbedMessages {
     }
 
     /**
+     * Adds the Instructor Portion to the Help Page
+     * @param eb the already pre-build Help Page
+     */
+    public static void getInstructor(EmbedBuilder eb) {
+        eb.setDescription(eb.getDescriptionBuilder().append(" with commands for Instructors"));
+
+        eb.addBlankField(false);
+
+        eb.addField("Instructor Commands", "Commands that are only for Instructors", false);
+
+        eb.addField("`!trained`", """
+                Will add the Role `Trained` the mentioned Member.
+                The mentioned Member must be mentioned with a Tag.
+                Only one Member at a time can be mentioned with the Command.
+                Syntax:
+                `!trained @User`""", false);
+    }
+
+    /**
      * Adds the Event Organizer Portion to the Help Page
      * @param eb the already pre-build Help Page
      */
     public static void getEventOrganizer(EmbedBuilder eb) {
-        eb.setDescription(eb.getDescriptionBuilder().append(" with commands for Event Organizers"));
+        StringBuilder desc = eb.getDescriptionBuilder();
+        if(desc.toString().contains("with commands for"))
+            eb.setDescription(desc.append(" and Event Organizers"));
+        else
+            eb.setDescription(desc.append(" with commands for Event Organizers"));
 
         eb.addBlankField(false);
 

@@ -1,4 +1,5 @@
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -6,6 +7,8 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
+import net.dv8tion.jda.api.exceptions.HierarchyException;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,15 +30,15 @@ public class BotEvents {
         List<Role> rolesOfUser = authorMember != null ? authorMember.getRoles() : new ArrayList<>();
         boolean isAdmin = rolesOfUser.contains(event.getGuild().getRoleById(BotMain.ROLES.get("Admin"))) ||
                 event.getUser().getIdLong() == BotMain.ROLES.get("Owner");
-        event.retrieveMessage().queue(message -> { // only do something if he is admin or the wastebasket was already here
+        event.retrieveMessage().queue(message -> { // only do something if he is admin or the wastebasket was already here from the bot
             if(isAdmin || message.getReactions().get(0).isSelf()) {
                 if (!message.getAuthor().isBot()) return; // delete only bot messages
                 if (event.getReactionEmote().isEmoji()) {
                     String emoji = event.getReactionEmote().getEmoji();
                     if (emoji.substring(0, emoji.length() - 1).equals("\uD83D\uDDD1") || emoji.equals("\uD83D\uDDD1")) { // :wastebasket:
                         LoggerFactory.getLogger("ReactionAdded").info("deleting message because of :wastebasket: reaction");
-                        if (Countdowns.messageIds.contains(message.getId())) {
-                            Countdowns.closeSpecificThread(message.getId());
+                        if (Countdowns.messageIds.contains(message.getId())) { // check if this message was part of a Countdown
+                            Countdowns.closeSpecificThread(message.getId()); // close that countdown since the message will be deleted
                         }
                         message.delete().queue();
                     }
@@ -60,14 +63,14 @@ public class BotEvents {
                 if (oldNick != null) {
                     oldNick = oldNick.toLowerCase(Locale.ROOT);
                     String oldOffset = oldNick.substring(oldNick.indexOf("[z"));
-                    if (!newOffset.equals(oldOffset)) {
+                    if (!newOffset.equals(oldOffset)) { // don't change the timezone if the offset is the same
                         if (Timezones.updateSpecificTimezone(event.getUser().getIdLong(), newOffset)) {
                             logger.info("Updated Timezone of User: " + event.getNewNickname());
                         } else {
                             logger.error("Could not save Timezone of User: " + event.getNewNickname());
                         }
                     }
-                } else {
+                } else { // old nick could not be loaded but new nick is still there so load timezone anyway
                     if (Timezones.updateSpecificTimezone(event.getUser().getIdLong(), newOffset)) {
                         logger.info("Updated Timezone of User: " + event.getNewNickname());
                     } else {
@@ -92,6 +95,7 @@ public class BotEvents {
         // These boolean are always false if written in a personal message
         boolean isAdmin = false;
         boolean isEventOrganizer = false;
+        boolean isInstructor = false;
 
         // if this message is from a Guild/Server then check if they have the Admin and/or event organizer role
         if(event.isFromGuild()) {
@@ -99,6 +103,7 @@ public class BotEvents {
             List<Role> rolesOfUser = authorMember != null ? authorMember.getRoles() : new ArrayList<>();
             isAdmin = rolesOfUser.contains(event.getGuild().getRoleById(BotMain.ROLES.get("Admin")));
             isEventOrganizer = rolesOfUser.contains(event.getGuild().getRoleById(BotMain.ROLES.get("Event_Organizer")));
+            isInstructor = rolesOfUser.contains(event.getGuild().getRoleById(BotMain.ROLES.get("Instructor")));
         }
         boolean isOwner = event.getAuthor().getIdLong() == BotMain.ROLES.get("Owner");
         isAdmin = isAdmin || isOwner; // Owner is also admin
@@ -114,6 +119,8 @@ public class BotEvents {
             switch (command) {
                 case "help" -> { // show Help Page
                     EmbedBuilder eb = EmbedMessages.getHelpPage();
+                    if(isInstructor)
+                        EmbedMessages.getInstructor(eb); // attach Instructor only commands
                     if(isEventOrganizer)
                         EmbedMessages.getEventOrganizer(eb); // attach Event Organizer only commands
                     if(isAdmin)
@@ -169,6 +176,41 @@ public class BotEvents {
                 }
                 case "timezones" -> {
                     channel.sendMessage(Timezones.printAllUsers(event.getGuild())).queue();
+                }
+                case "trained" -> {
+                    if(isInstructor) {
+                        String errorMessage = null;
+                        List<Member> member = event.getMessage().getMentionedMembers();
+                        if(member.size() == 1) {
+                            Role trainedRole = event.getGuild().getRoleById(BotMain.ROLES.get("Trained"));
+                            if(trainedRole != null) {
+                                try {
+                                    event.getGuild().addRoleToMember(member.get(0), trainedRole).queue();
+                                    MessageBuilder messageBuilder = new MessageBuilder();
+                                    messageBuilder.append(member.get(0)).append(" has the Role `Trained`");
+                                    channel.sendMessage(messageBuilder.build()).queue();
+                                } catch (HierarchyException e) {
+                                    errorMessage = "Could not add the Role to User because Bot has his Role under the Trained role";
+                                    channel.sendMessage(errorMessage).queue(BotEvents::addTrashcan);
+                                } catch (InsufficientPermissionException e) {
+                                    errorMessage = "Bot doesn't have the Permission Manage Roles";
+                                    channel.sendMessage(errorMessage).queue(BotEvents::addTrashcan);
+                                }
+                            } else {
+                                errorMessage = "Can't find the Trained Role. Please update the role ID's";
+                                channel.sendMessage(errorMessage).queue(BotEvents::addTrashcan);
+                            }
+                        } else if(member.size() == 0) {
+                            channel.sendMessage("You have to mention a User that is Trained").queue();
+                        } else {
+                            channel.sendMessage("Can't mention multiple members at once, please mention one member at a time").
+                                    queue(message -> deleteMessageAfterXTime(message, 10));
+                        }
+                        if(errorMessage != null) {
+                            logger.error(errorMessage);
+                        }
+                    } else
+                        channel.sendMessage("You don't have permission for this command").queue();
                 }
                 case "countdown" -> { // create a live countdown
                     if (isEventOrganizer || isOwner) {
@@ -235,10 +277,19 @@ public class BotEvents {
         }
     }
 
+    /**
+     * Adds a Trashcan so that the Message can be easily deleted by users
+     * @param message The message where the Trashcan should be added
+     */
     public static void addTrashcan(Message message) {
         message.addReaction("\uD83D\uDDD1").queue(); // add a reaction to make it easy to delete the post
     }
 
+    /**
+     * Deletes the message after the given amount of time in Seconds
+     * @param message The message to delete
+     * @param seconds Time until the message should be deleted
+     */
     public static void deleteMessageAfterXTime(Message message, long seconds) {
         try {
             Thread.sleep(seconds * 1000);
@@ -246,6 +297,11 @@ public class BotEvents {
         message.delete().queue(); // delete the Message after X sec
     }
 
+    /**
+     * Returns the Name of the User on the Server
+     * @param member User where we want the name
+     * @return Return the Nickname, or username if nickname is not available
+     */
     public static String getServerName(Member member) {
         String nickname = member.getNickname();
         if(nickname == null)

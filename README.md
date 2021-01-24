@@ -22,10 +22,12 @@ You will need to create at 2 files (These files will be created by the program i
 and you will be asked to fill them):
 * Token.cfg (contains only the Bot Token)
 * Roles.cfg <br> Layout:
-  * Admin=\<ID of the Admin Role>
-  * Owner=\<ID of the Owner Role>
-  * Event_Organizer=\<ID of the Event_Organizer Role>
   * Guild=\<ID of the Guild>
+  * Owner=\<ID of the Owner Role>
+  * Admin=\<ID of the Admin Role>
+  * Event_Organizer=\<ID of the Event_Organizer Role>
+  * Instructor=\<ID of the Instructor Role>
+  * Trained=\<ID of the Trained Roles>
 
 ### How to Use
 
@@ -38,6 +40,7 @@ and you will be asked to fill them):
 - [X] Countdown functionality that carries on after restart
 - [X] Purge function for Admin
 - [X] Timezone functionality to know the timezone / current local time of a user
+- [X] Possibility to add the Trained Role to Users for Instructors
 - [ ] Event functionality where users can choose their position
 
 ## License [![GitHub license](https://badgen.net/github/license/maxwai/ATConnect_Bot)](LICENSE)

@@ -50,16 +50,16 @@ public class BotMain {
      */
     private static void initializeJDABuilder() {
         jdaBuilder = JDABuilder.createDefault(TOKEN)
-                .setEventManager(new AnnotatedEventManager())
-                .addEventListeners(new BotEvents())
-                .setActivity(Activity.listening("!help"))
-                .disableIntents(GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_MESSAGE_TYPING)
-                .enableIntents(GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_MEMBERS)
-                .setMemberCachePolicy(MemberCachePolicy.ALL);
+                .setEventManager(new AnnotatedEventManager()) // set to Event Manager to use @Annotated Methods
+                .addEventListeners(new BotEvents()) // add the Event Listener Class
+                .setActivity(Activity.listening("!help")) // set that the Bot is "listening to !help"
+                .disableIntents(GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_MESSAGE_TYPING) // disable the Presences and typing Intents since not used
+                .enableIntents(GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_MEMBERS) // enable the Message reaction and guild members intents
+                .setMemberCachePolicy(MemberCachePolicy.ALL); // cache all members, this is used for member fetching
     }
 
     /**
-     * Will reload the Configs (without the Countdowns)
+     * Will reload the Configs (without the Countdowns and Timezones)
      */
     public static void reloadConfig() {
         TOKEN = Config.getToken();
@@ -70,9 +70,9 @@ public class BotMain {
      * Will restart the Bot
      */
     public static void restartBot(){
-        disconnectBot();
+        disconnectBot(); // disconnect the Bot
         try {
-            connectBot();
+            connectBot(); // connect the Bot
         } catch (LoginException e) {
             e.printStackTrace();
         }
@@ -98,12 +98,12 @@ public class BotMain {
     private static void connectBot() throws LoginException {
         jda = jdaBuilder.build();
         try {
-            jda.awaitReady();
+            jda.awaitReady(); // wait that the Bot is fully connected
             Countdowns.restartCountdowns(jda);
-            Guild guild = jda.getGuildById(ROLES.get("Guild"));
+            Guild guild = jda.getGuildById(ROLES.get("Guild")); // get the Guild where the Bot is active
             if(guild != null)
-                guild.loadMembers().onSuccess(members -> {});
-            Timezones.loadTimezones();
+                guild.loadMembers().onSuccess(members -> {}); // load all Members into cache
+            Timezones.loadTimezones(); // load the all timezones of all the Users
         } catch (InterruptedException ignored) {
         }
     }
@@ -112,8 +112,8 @@ public class BotMain {
      * Will disconnect the Bot and save the Countdowns
      */
     public static void disconnectBot() {
-        Countdowns.closeAllThreads();
-        Timezones.saveTimezones();
+        Countdowns.closeAllThreads(); // finish and save the Countdowns
+        Timezones.saveTimezones(); // save all USer Timezones
         jda.getRegisteredListeners().forEach(jda::removeEventListener);
         jda.shutdown();
     }
