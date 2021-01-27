@@ -88,17 +88,17 @@ public class BotEvents {
 	
 	@SubscribeEvent
 	public void onReady(ReadyEvent event) {
-		logger.info("Discord Bot is Ready");
+		logger.warn("Discord Bot is Ready");
 	}
 	
 	@SubscribeEvent
 	public void onResumed(ResumedEvent event) {
-		logger.info("Discord Bot connection Resumed");
+		logger.warn("Discord Bot connection Resumed");
 	}
 	
 	@SubscribeEvent
 	public void onReconnected(ReconnectedEvent event) {
-		logger.info("Discord Bot reconnected successfully");
+		logger.warn("Discord Bot reconnected successfully");
 	}
 	
 	@SubscribeEvent
