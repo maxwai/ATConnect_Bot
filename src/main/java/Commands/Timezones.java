@@ -159,13 +159,14 @@ public class Timezones {
 					try {
 						String offset = getTimezone(nickname.substring(nickname.indexOf("[z")));
 						timezonesTemp.put(member.getIdLong(), offset);
-						logger.info("Updated Timezone of User: " + member.getNickname());
+						logger.info("Updated Timezone of User: " + BotEvents.getServerName(member));
 					} catch (NumberFormatException ignored) { // The timezone in the nickname can't be parsed as a timezone
 						// if the User was in the old Map then take his last value as his current
 						if (timezones.containsKey(member.getIdLong()))
 							timezonesTemp
 									.put(member.getIdLong(), timezones.get(member.getIdLong()));
-						logger.error("Could not save Timezone of User: " + member.getNickname());
+						logger.error("Could not save Timezone of User: " + BotEvents
+								.getServerName(member));
 					}
 				}
 			});
@@ -222,11 +223,10 @@ public class Timezones {
 					timezone.indexOf(']')); // extract the offset without extras
 			// try to catch as many "troll" offsets as possible
 			if (offset.contains("--") || offset.contains("++")) {
-				offset = offset.substring(2);
-			} else if (offset.equals("+-0") || offset.equals("-+0") ||
-					offset.equals("+/-0") || offset.equals("-/+0") ||
-					offset.equals("±0")) {
-				offset = "0";
+				offset = "+" + offset.substring(2);
+			} else if (offset.equals("+-0") || offset.equals("-+0") || offset.equals("+/-0")
+					|| offset.equals("-/+0") || offset.equals("\u00b10")) {
+				offset = "+0";
 			} else if (offset.contains(":")) {
 				if (offset.indexOf(':') == 2) {
 					offset = offset.charAt(0) + "0" + offset.substring(1);

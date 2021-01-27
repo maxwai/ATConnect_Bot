@@ -2,7 +2,7 @@ package Bot;
 
 import Commands.Countdowns;
 import Commands.Timezones;
-import TelegramBot.TelegramBot;
+import TelegramBot.TelegramBots;
 import java.util.Map;
 import javax.security.auth.login.LoginException;
 import net.dv8tion.jda.api.JDA;
@@ -43,7 +43,7 @@ public class BotMain {
 	private static JDABuilder jdaBuilder;
 	
 	public static void main(String[] args) throws LoginException {
-		TelegramBot.setupBots();
+		TelegramBots.setupBots();
 		initializeJDABuilder();
 		connectBot();
 	}

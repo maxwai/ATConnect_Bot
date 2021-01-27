@@ -1,7 +1,7 @@
 package Commands;
 
 import Bot.BotMain;
-import TelegramBot.TelegramBot;
+import TelegramBot.TelegramBots;
 import TelegramBot.TelegramLogger;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
@@ -45,7 +45,7 @@ public class BotStatus {
 			logger.warn("Stopping Bot");
 			channel.sendMessage("stopping the Bot. Bye...").queue();
 			BotMain.disconnectBot(); // stop the Bot
-			TelegramBot.closeBots();
+			TelegramBots.closeBots();
 		} else // User isn't the Owner
 			channel.sendMessage("You don't have permission for this command").queue();
 	}

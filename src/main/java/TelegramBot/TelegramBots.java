@@ -11,7 +11,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.BotSession;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
-public class TelegramBot {
+public class TelegramBots {
 	
 	private static final TelegramLogger logger = TelegramLogger.getLogger("Telegram");
 	private static DiscordBotTelegramBot botAll;
@@ -108,7 +108,7 @@ public class TelegramBot {
 				if (message_text.equals("stop")) {
 					logger.warn("Stopping Bot");
 					BotMain.disconnectBot(); // stop the Bot
-					TelegramBot.closeBots();
+					TelegramBots.closeBots();
 				}
 			}
 		}

@@ -8,7 +8,7 @@ import Commands.Purge;
 import Commands.Reload;
 import Commands.Timezones;
 import Commands.Trained;
-import TelegramBot.TelegramBot;
+import TelegramBot.TelegramBots;
 import TelegramBot.TelegramLogger;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +24,10 @@ import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.ReconnectedEvent;
 import net.dv8tion.jda.api.events.ResumedEvent;
 import net.dv8tion.jda.api.events.ShutdownEvent;
-import net.dv8tion.jda.api.events.StatusChangeEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
-import org.slf4j.LoggerFactory;
 
 public class BotEvents {
 	
@@ -81,7 +79,7 @@ public class BotEvents {
 	@SubscribeEvent
 	public void onException(ExceptionEvent event) {
 		if (event.isLogged()) {
-			TelegramBot.sendImportantLog(logger.getName(), "Error", event.getCause().getMessage());
+			TelegramBots.sendImportantLog(logger.getName(), "Error", event.getCause().getMessage());
 		} else {
 			logger.error(event.getCause().getMessage());
 			event.getCause().printStackTrace();

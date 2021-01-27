@@ -68,7 +68,7 @@ public class Reload {
 	 */
 	private static void reloadTimezones(MessageReceivedEvent event, MessageChannel channel) {
 		logger.info("Reloading the Timezones");
-		channel.sendMessage("reloading all user Timezones").queue(message -> {
+		channel.sendMessage("reloading all user Timezones...").queue(message -> {
 			Timezones.updateTimezones(event.getJDA()); // reload all Timezones
 			message.editMessage("Timezones reloaded").queue();
 		});

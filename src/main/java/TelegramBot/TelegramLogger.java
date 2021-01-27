@@ -24,27 +24,27 @@ public class TelegramLogger {
 	
 	public void trace(String message) {
 		logger.trace(message);
-		TelegramBot.sendLog(name, "Trace", message);
+		TelegramBots.sendLog(name, "Trace", message);
 	}
 	
 	public void debug(String message) {
 		logger.debug(message);
-		TelegramBot.sendLog(name, "Debug", message);
+		TelegramBots.sendLog(name, "Debug", message);
 	}
 	
 	public void info(String message) {
 		logger.info(message);
-		TelegramBot.sendLog(name, "Info", message);
+		TelegramBots.sendLog(name, "Info", message);
 	}
 	
 	public void warn(String message) {
 		logger.warn(message);
-		TelegramBot.sendImportantLog(name, "Warning", message);
+		TelegramBots.sendImportantLog(name, "Warning", message);
 	}
 	
 	public void error(String message) {
 		logger.error(message);
-		TelegramBot.sendImportantLog(name, "Error", message);
+		TelegramBots.sendImportantLog(name, "Error", message);
 	}
 	
 }
