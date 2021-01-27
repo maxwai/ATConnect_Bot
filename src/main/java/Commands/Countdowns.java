@@ -4,12 +4,15 @@ import Bot.BotEvents;
 import Bot.Config;
 import TelegramBot.TelegramLogger;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Stack;
 import java.util.concurrent.TimeUnit;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.w3c.dom.CDATASection;
 
 public class Countdowns {
 	
@@ -25,6 +28,10 @@ public class Countdowns {
 	 * The Logger for Log Messages
 	 */
 	private static final TelegramLogger logger = TelegramLogger.getLogger("Countdown");
+	/**
+	 * Date Format for the input of the Countdown
+	 */
+	private static final DateTimeFormatter sdf = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ssX");
 	
 	/**
 	 * Will add a new countdown to the List
@@ -53,30 +60,19 @@ public class Countdowns {
 			channel.deleteMessageById(event.getMessageId()).queue();
 			content = content.substring(11);
 			
-			// take the time information of the countdown
-			int day = Integer.parseInt(content.substring(0, content.indexOf('.')));
-			content = content.substring(content.indexOf('.') + 1);
-			int month = Integer.parseInt(content.substring(0, content.indexOf('.')));
-			content = content.substring(content.indexOf('.') + 1);
-			int year = Integer.parseInt(content.substring(0, content.indexOf(' ')));
-			content = content.substring(content.indexOf(' ') + 1);
-			int hour = Integer.parseInt(content.substring(0, content.indexOf(':')));
-			content = content.substring(content.indexOf(':') + 1);
-			int minutes;
-			
-			// take the extra text that needs to be displayed after the countdown
-			if (content.length() <= 2) {
-				minutes = Integer.parseInt(content);
-				content = "";
+			String dateStr;
+			String text = content.substring(content.lastIndexOf(' ') + 1);
+			if (Character.isDigit(text.charAt(0))) {
+				text = "";
+				dateStr = content;
 			} else {
-				minutes = Integer.parseInt(content.substring(0, content.indexOf(' ')));
-				content = content.substring(content.indexOf(' '));
+				dateStr = content.substring(0, content.lastIndexOf(' '));
 			}
 			
+			dateStr += ":00Z";
+			
 			// Parse the date to a Instant Instance
-			Instant date = Instant.parse(year + "-" + String.format("%02d", month) + "-" +
-					String.format("%02d", day) + "T" + String.format("%02d", hour) + ":" +
-					String.format("%02d", minutes) + ":00Z");
+			Instant date = sdf.parse(dateStr, Instant::from);
 			
 			// Check if the time is not in th past
 			if (date.getEpochSecond() < Instant.now().getEpochSecond()) {
@@ -88,7 +84,7 @@ public class Countdowns {
 			}
 			logger.info("Starting countdown thread");
 			// start the Thread that changes the Message to the current Countdown
-			CountdownsThread countdownsThread = new CountdownsThread(channel, content, date);
+			CountdownsThread countdownsThread = new CountdownsThread(channel, text, date);
 			countdownsThread.start();
 			countdowns.push(countdownsThread);
 			saveAllCountdowns(); // save the countdown in the event of unexpected failure
