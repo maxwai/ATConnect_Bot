@@ -1,16 +1,15 @@
 package Commands;
 
 import Bot.BotEvents;
+import TelegramBot.TelegramLogger;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Purge {
 	
 	/**
 	 * The Logger for Log Messages
 	 */
-	private static final Logger logger = LoggerFactory.getLogger("Purge Command");
+	private static final TelegramLogger logger = TelegramLogger.getLogger("Purge Command");
 	
 	/**
 	 * Will purge the given amount of Messages

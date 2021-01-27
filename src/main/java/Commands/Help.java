@@ -1,19 +1,18 @@
 package Commands;
 
 import Bot.BotEvents;
+import TelegramBot.TelegramLogger;
 import java.awt.Color;
 import java.time.Instant;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Help {
 	
 	/**
 	 * The Logger for Log Messages
 	 */
-	private static final Logger logger = LoggerFactory.getLogger("Help Command");
+	private static final TelegramLogger logger = TelegramLogger.getLogger("Help Command");
 	
 	/**
 	 * will show the Help Embed to the User

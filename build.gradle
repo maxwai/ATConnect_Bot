@@ -15,5 +15,6 @@ dependencies {
         exclude module: 'opus-java'
     }
     implementation 'ch.qos.logback:logback-classic:1.2.3'
+    implementation 'org.telegram:telegrambots:5.0.1'
 
 }

@@ -3,6 +3,7 @@ package Commands;
 import Bot.BotEvents;
 import Bot.BotMain;
 import Bot.Config;
+import TelegramBot.TelegramLogger;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -18,15 +19,13 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Timezones {
 	
 	/**
 	 * The Logger for Log Messages
 	 */
-	private static final Logger logger = LoggerFactory.getLogger("Timezones");
+	private static final TelegramLogger logger = TelegramLogger.getLogger("Timezones");
 	/**
 	 * Date Format for how to output the local Time of a User
 	 */

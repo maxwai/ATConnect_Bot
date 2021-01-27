@@ -2,6 +2,7 @@ package Commands;
 
 import Bot.BotEvents;
 import Bot.BotMain;
+import TelegramBot.TelegramLogger;
 import java.util.List;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -10,15 +11,13 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Trained {
 	
 	/**
 	 * The Logger for Log Messages
 	 */
-	private static final Logger logger = LoggerFactory.getLogger("Trained Command");
+	private static final TelegramLogger logger = TelegramLogger.getLogger("Trained Command");
 	
 	/**
 	 * Will add the Role "Trained" to a User

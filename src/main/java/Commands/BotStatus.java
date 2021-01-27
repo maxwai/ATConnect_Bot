@@ -1,16 +1,16 @@
 package Commands;
 
 import Bot.BotMain;
+import TelegramBot.TelegramBot;
+import TelegramBot.TelegramLogger;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class BotStatus {
 	
 	/**
 	 * The Logger for Log Messages
 	 */
-	private static final Logger logger = LoggerFactory.getLogger("Bot Status");
+	private static final TelegramLogger logger = TelegramLogger.getLogger("Bot Status");
 	
 	/**
 	 * Will restart the bot Connection
@@ -21,7 +21,7 @@ public class BotStatus {
 	public static void restartBot(boolean isAdmin, MessageChannel channel) {
 		if (isAdmin) { // only Admin is allowed to restart the Bot
 			BotMain.restartIDs[0] = channel.getIdLong(); // save the channel ID for later
-			logger.info("Restarting Bot");
+			logger.warn("Restarting Bot");
 			channel.sendMessage("restarting Bot").queue(message -> {
 				synchronized (BotMain.lock) {
 					BotMain.restartIDs[1] = message.getIdLong(); // save the message ID for later
@@ -42,9 +42,10 @@ public class BotStatus {
 	 */
 	public static void stopBot(boolean isOwner, MessageChannel channel) {
 		if (isOwner) { // only the Owner is allowed to stop the Bot
-			logger.info("Stopping Bot");
+			logger.warn("Stopping Bot");
 			channel.sendMessage("stopping the Bot. Bye...").queue();
 			BotMain.disconnectBot(); // stop the Bot
+			TelegramBot.closeBots();
 		} else // User isn't the Owner
 			channel.sendMessage("You don't have permission for this command").queue();
 	}

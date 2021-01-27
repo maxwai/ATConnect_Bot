@@ -2,17 +2,16 @@ package Commands;
 
 import Bot.BotEvents;
 import Bot.BotMain;
+import TelegramBot.TelegramLogger;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Reload {
 	
 	/**
 	 * The Logger for Log Messages
 	 */
-	private static final Logger logger = LoggerFactory.getLogger("Reload Command");
+	private static final TelegramLogger logger = TelegramLogger.getLogger("Reload Command");
 	
 	/**
 	 * Will reload the given Information (can be Config or Timezones)

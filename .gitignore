@@ -28,5 +28,6 @@ hs_err_pid*
 /build/
 Token.cfg
 Roles.cfg
-/Countdowns.cfg
-/Timezones.cfg
+Countdowns.cfg
+Timezones.cfg
+Telegram.cfg

@@ -8,6 +8,8 @@ import Commands.Purge;
 import Commands.Reload;
 import Commands.Timezones;
 import Commands.Trained;
+import TelegramBot.TelegramBot;
+import TelegramBot.TelegramLogger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -16,14 +18,22 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.DisconnectEvent;
+import net.dv8tion.jda.api.events.ExceptionEvent;
+import net.dv8tion.jda.api.events.ReadyEvent;
+import net.dv8tion.jda.api.events.ReconnectedEvent;
+import net.dv8tion.jda.api.events.ResumedEvent;
+import net.dv8tion.jda.api.events.ShutdownEvent;
+import net.dv8tion.jda.api.events.StatusChangeEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BotEvents {
+	
+	private static final TelegramLogger logger = TelegramLogger.getLogger("BotStatus");
 	
 	/**
 	 * Adds a Trashcan so that the Message can be easily deleted by users
@@ -63,6 +73,41 @@ public class BotEvents {
 		return nickname;
 	}
 	
+	@SubscribeEvent
+	public void onDisconnect(DisconnectEvent event) {
+		logger.error("Discord Bot Disconnected");
+	}
+	
+	@SubscribeEvent
+	public void onException(ExceptionEvent event) {
+		if (event.isLogged()) {
+			TelegramBot.sendImportantLog(logger.getName(), "Error", event.getCause().getMessage());
+		} else {
+			logger.error(event.getCause().getMessage());
+			event.getCause().printStackTrace();
+		}
+	}
+	
+	@SubscribeEvent
+	public void onReady(ReadyEvent event) {
+		logger.info("Discord Bot is Ready");
+	}
+	
+	@SubscribeEvent
+	public void onResumed(ResumedEvent event) {
+		logger.info("Discord Bot connection Resumed");
+	}
+	
+	@SubscribeEvent
+	public void onReconnected(ReconnectedEvent event) {
+		logger.info("Discord Bot reconnected successfully");
+	}
+	
+	@SubscribeEvent
+	public void onShutdown(ShutdownEvent event) {
+		logger.warn("Discord Bot is shutting down");
+	}
+	
 	/**
 	 * Is triggered when an Emote is added / count is changed
 	 *
@@ -84,7 +129,7 @@ public class BotEvents {
 						String emoji = event.getReactionEmote().getEmoji();
 						if (emoji.substring(0, emoji.length() - 1).equals("\uD83D\uDDD1")
 								|| emoji.equals("\uD83D\uDDD1")) { // :wastebasket:
-							LoggerFactory.getLogger("ReactionAdded")
+							TelegramLogger.getLogger("ReactionAdded")
 									.info("deleting message because of :wastebasket: reaction");
 							// check if this message was part of a Countdown
 							if (Countdowns.messageIds.contains(message.getId()))
@@ -111,7 +156,7 @@ public class BotEvents {
 			if (newNick.contains("[z") && !newNick.contains("[alt")) {
 				String newOffset = newNick.substring(newNick.indexOf("[z"));
 				String oldNick = event.getOldNickname();
-				Logger logger = LoggerFactory.getLogger("NicknameChanged");
+				TelegramLogger logger = TelegramLogger.getLogger("NicknameChanged");
 				if (oldNick != null) {
 					oldNick = oldNick.toLowerCase(Locale.ROOT);
 					String oldOffset = oldNick.substring(oldNick.indexOf("[z"));
@@ -140,7 +185,7 @@ public class BotEvents {
 	@SubscribeEvent
 	public void onReceiveMessage(MessageReceivedEvent event) {
 		if (event.getAuthor().isBot()) return;
-		Logger logger = LoggerFactory.getLogger("ReceivedMessage");
+		TelegramLogger logger = TelegramLogger.getLogger("ReceivedMessage");
 		String content = event.getMessage().getContentRaw().toLowerCase(Locale.ROOT);
 		MessageChannel channel = event.getChannel();
 		
@@ -154,18 +199,24 @@ public class BotEvents {
 			Member authorMember = event.getGuild().getMember(event.getAuthor());
 			List<Role> rolesOfUser =
 					authorMember != null ? authorMember.getRoles() : new ArrayList<>();
-			isAdmin = rolesOfUser
-					.contains(event.getGuild().getRoleById(BotMain.ROLES.get("Admin")));
-			isEventOrganizer = rolesOfUser
-					.contains(event.getGuild().getRoleById(BotMain.ROLES.get("Event_Organizer")));
-			isInstructor = rolesOfUser
-					.contains(event.getGuild().getRoleById(BotMain.ROLES.get("Instructor")));
+			
+			Long adminRole = BotMain.ROLES.get("Admin");
+			Long eventOrganizerRole = BotMain.ROLES.get("Event_Organizer");
+			Long instructorRole = BotMain.ROLES.get("Instructor");
+			
+			isAdmin = rolesOfUser.contains(adminRole == null ? null
+					: event.getGuild().getRoleById(adminRole));
+			isEventOrganizer = rolesOfUser.contains(eventOrganizerRole == null ? null
+					: event.getGuild().getRoleById(eventOrganizerRole));
+			isInstructor = rolesOfUser.contains(instructorRole == null ? null
+					: event.getGuild().getRoleById(instructorRole));
 		}
 		boolean isOwner = event.getAuthor().getIdLong() == BotMain.ROLES.get("Owner");
 		isAdmin = isAdmin || isOwner; // Owner is also admin
 		
 		if (content.length() != 0 && content.charAt(0) == '!') {
-			logger.info("Received Message from " + event.getAuthor().getName() + ": " + content);
+			logger.info("Received Message from " + event.getAuthor().getName() + " in channel "
+					+ channel.getName() + ": " + content);
 			String command;
 			content = content.substring(1);
 			if (content.indexOf(' ') != -1)
