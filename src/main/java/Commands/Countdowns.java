@@ -32,16 +32,13 @@ public class Countdowns {
 	 * @param isEventOrganizer If this User is an Event Organizer
 	 * @param isOwner If the User is the Owner of the Bot
 	 * @param event Event to get more information
-	 * @param channel The Channel where the Message was send.
-	 * 		This may be removed in a further release since this can also be fetched with the event
-	 * 		Instance
 	 */
 	public static void countdownCommand(boolean isEventOrganizer, boolean isOwner,
-			MessageReceivedEvent event, MessageChannel channel) {
+			MessageReceivedEvent event) {
 		if (isEventOrganizer || isOwner) // Countdown can only be done by Event Organizer or Owner
-			startNewCountdown(event, channel);
+			startNewCountdown(event, event.getChannel());
 		else // isn't Event Organizer or Owner
-			channel.sendMessage("You don't have permission for this command").queue();
+			event.getChannel().sendMessage("You don't have permission for this command").queue();
 	}
 	
 	/**

@@ -24,13 +24,10 @@ public class Trained {
 	 *
 	 * @param isInstructor If the User sending the Command is an Instructor
 	 * @param event Event to get more information
-	 * @param channel The Channel where the Message was send.
-	 * 		This may be removed in a further release since this can also be fetched with the event
-	 * 		Instance
 	 */
-	public static void makeUserTrained(boolean isInstructor, MessageReceivedEvent event,
-			MessageChannel channel) {
+	public static void makeUserTrained(boolean isInstructor, MessageReceivedEvent event) {
 		if (isInstructor) { // only the Instructor can mark Users as trained
+			MessageChannel channel = event.getChannel();
 			String errorMessage = null; // If there was an error message send to the User, this will then send a Log as well
 			List<Member> member = event.getMessage().getMentionedMembers();
 			if (member.size() == 1) {
@@ -67,6 +64,6 @@ public class Trained {
 				logger.error(errorMessage); // There was an Error so send it as well in the Log
 			}
 		} else // User isn't an Instructor
-			channel.sendMessage("You don't have permission for this command").queue();
+			event.getChannel().sendMessage("You don't have permission for this command").queue();
 	}
 }

@@ -227,15 +227,15 @@ public class BotEvents {
 				case "ping" -> Ping.makePing(channel); // make a ping test
 				case "time" -> Timezones
 						.getTimezoneOfUserCommand(event, content); // get the Timezone of a User
-				case "timezones" -> Timezones.getTimezoneOfAllUsersCommand(event.getGuild(),
-						channel); // print the Timezone of all Users
-				case "trained" -> Trained.makeUserTrained(isInstructor, event,
-						channel); // give a User the Trained Role
-				case "countdown" -> Countdowns.countdownCommand(isEventOrganizer, isOwner, event,
-						channel); // create a live countdown
+				case "timezones" -> Timezones
+						.getTimezoneOfAllUsersCommand(event); // print the Timezone of all Users
+				case "trained" -> Trained
+						.makeUserTrained(isInstructor, event); // give a User the Trained Role
+				case "countdown" -> Countdowns.countdownCommand(isEventOrganizer, isOwner,
+						event); // create a live countdown
 				case "restart" -> BotStatus
 						.restartBot(isAdmin, channel); // restarts the Bot connection
-				case "reload" -> Reload.reloadMain(isAdmin, event, channel,
+				case "reload" -> Reload.reloadMain(isAdmin, event,
 						content); // reload the Config files or Timezones
 				case "purge" -> Purge.purgeMessages(isOwner, channel,
 						content); // purges X Messages from the channel

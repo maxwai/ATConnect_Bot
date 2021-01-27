@@ -18,29 +18,22 @@ public class Reload {
 	 *
 	 * @param isAdmin the User is an Admin
 	 * @param event Event to get more information
-	 * @param channel The Channel where the Message was send.
-	 * 		This may be removed in a further release since this can also be fetched with the event
-	 * 		Instance
 	 * @param content The Content of the Message that was send.
-	 * 		This may be removed in a further release since this can also be fetched with the event
-	 * 		Instance
 	 */
-	public static void reloadMain(boolean isAdmin, MessageReceivedEvent event,
-			MessageChannel channel, String content) {
+	public static void reloadMain(boolean isAdmin, MessageReceivedEvent event, String content) {
 		if (isAdmin) { // only Admin is allowed to Reload the Config or Timezones
 			if (content.equals("reload")) { // The User did not specify what to reload
-				reloadNotSpecified(channel);
+				reloadNotSpecified(event.getChannel());
 			} else {
 				content = content.substring(7);
 				switch (content) {
-					case "config" -> reloadConfig(channel); // Reload Config files
-					case "timezones", "timezone" -> reloadTimezones(event,
-							channel); // Reload Timezones
-					default -> reloadNotSpecified(channel);
+					case "config" -> reloadConfig(event.getChannel()); // Reload Config files
+					case "timezones", "timezone" -> reloadTimezones(event); // Reload Timezones
+					default -> reloadNotSpecified(event.getChannel());
 				}
 			}
 		} else // User isn't an Admin
-			channel.sendMessage("You don't have permission for this command").queue();
+			event.getChannel().sendMessage("You don't have permission for this command").queue();
 	}
 	
 	/**
@@ -62,13 +55,10 @@ public class Reload {
 	 * Reloads the Timezones of all Users
 	 *
 	 * @param event Event to get more information
-	 * @param channel The Channel where the Message was send.
-	 * 		This may be removed in a further release since this can also be fetched with the event
-	 * 		Instance
 	 */
-	private static void reloadTimezones(MessageReceivedEvent event, MessageChannel channel) {
+	private static void reloadTimezones(MessageReceivedEvent event) {
 		logger.info("Reloading the Timezones");
-		channel.sendMessage("reloading all user Timezones...").queue(message -> {
+		event.getChannel().sendMessage("reloading all user Timezones...").queue(message -> {
 			Timezones.updateTimezones(event.getJDA()); // reload all Timezones
 			message.editMessage("Timezones reloaded").queue();
 		});

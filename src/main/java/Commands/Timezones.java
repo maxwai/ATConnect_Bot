@@ -41,8 +41,6 @@ public class Timezones {
 	 *
 	 * @param event Event to get more information
 	 * @param content The Content of the Message that was send.
-	 * 		This may be removed in a further release since this can also be fetched with the event
-	 * 		Instance
 	 */
 	public static void getTimezoneOfUserCommand(MessageReceivedEvent event, String content) {
 		if (content.length() != 4) { // check if Users are mentioned
@@ -92,10 +90,9 @@ public class Timezones {
 	/**
 	 * Will get a full list of all Users with Timezones and reply with all local Times
 	 *
-	 * @param guild The Guild where the command was written
-	 * @param channel The Channel where the Message was send.
+	 * @param event Event to get more information
 	 */
-	public static void getTimezoneOfAllUsersCommand(Guild guild, MessageChannel channel) {
+	public static void getTimezoneOfAllUsersCommand(MessageReceivedEvent event) {
 		Map<String, ArrayList<String>> timezoneGroups = new HashMap<>(); // Hashmap with all different timezones
 		timezones.forEach((memberID, offset) -> {
 			ArrayList<String> members; // Get the correct Arraylist
@@ -105,7 +102,7 @@ public class Timezones {
 				members = new ArrayList<>();
 				timezoneGroups.put(offset, members);
 			}
-			Member member = guild.getMemberById(memberID); // Get the Member with the given ID
+			Member member = event.getGuild().getMemberById(memberID); // Get the Member with the given ID
 			if (member != null) {
 				members.add(BotEvents.getServerName(member));
 			}
@@ -136,7 +133,7 @@ public class Timezones {
 			output.append("\n");
 		}
 		logger.info("Sending Timezones of all Users");
-		channel.sendMessage(output.append("```").toString()).queue();
+		event.getChannel().sendMessage(output.append("```").toString()).queue();
 	}
 	
 	/**
