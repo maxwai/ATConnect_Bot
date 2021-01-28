@@ -13,6 +13,7 @@ import TelegramBot.TelegramLogger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -32,6 +33,7 @@ import net.dv8tion.jda.api.hooks.SubscribeEvent;
 public class BotEvents {
 	
 	private static final TelegramLogger logger = TelegramLogger.getLogger("BotStatus");
+	private static Thread shutdownThread;
 	
 	/**
 	 * Adds a Trashcan so that the Message can be easily deleted by users
@@ -73,7 +75,16 @@ public class BotEvents {
 	
 	@SubscribeEvent
 	public void onDisconnect(DisconnectEvent event) {
-		logger.error("Discord Bot Disconnected");
+		shutdownThread = new Thread(() -> {
+			try {
+				Thread.sleep(60000);
+				logger.error("Discord Bot Disconnected");
+				shutdownThread = null;
+			} catch (InterruptedException ignored) {
+				logger.info("Discord Bot Disconnected");
+			}
+		});
+		shutdownThread.start();
 	}
 	
 	@SubscribeEvent
@@ -93,12 +104,20 @@ public class BotEvents {
 	
 	@SubscribeEvent
 	public void onResumed(ResumedEvent event) {
-		logger.warn("Discord Bot connection Resumed");
+		if (shutdownThread != null) {
+			shutdownThread.interrupt();
+			logger.info("Discord Bot connection Resumed");
+		} else
+			logger.warn("Discord Bot connection Resumed");
 	}
 	
 	@SubscribeEvent
 	public void onReconnected(ReconnectedEvent event) {
-		logger.warn("Discord Bot reconnected successfully");
+		if (shutdownThread != null) {
+			shutdownThread.interrupt();
+			logger.info("Discord Bot reconnected successfully");
+		} else
+			logger.warn("Discord Bot reconnected successfully");
 	}
 	
 	@SubscribeEvent
@@ -192,29 +211,40 @@ public class BotEvents {
 		boolean isEventOrganizer = false;
 		boolean isInstructor = false;
 		
-		// if this message is from a Guild/Server then check the roles of the User
-		if (event.isFromGuild()) {
-			Member authorMember = event.getGuild().getMember(event.getAuthor());
-			List<Role> rolesOfUser =
-					authorMember != null ? authorMember.getRoles() : new ArrayList<>();
+		Member authorMember = null;
+		Guild guild;
+		if (!event.isFromGuild()) {
+			guild = event.getJDA().getGuildById(BotMain.ROLES.get("Guild"));
+			if (guild != null) {
+				authorMember = guild.getMember(event.getAuthor());
+			}
+		} else {
+			guild = event.getGuild();
+			authorMember = guild.getMember(event.getAuthor());
+		}
+		
+		// Check the roles of the User
+		if (authorMember != null) {
+			List<Role> rolesOfUser = authorMember.getRoles();
 			
 			Long adminRole = BotMain.ROLES.get("Admin");
 			Long eventOrganizerRole = BotMain.ROLES.get("Event_Organizer");
 			Long instructorRole = BotMain.ROLES.get("Instructor");
 			
 			isAdmin = rolesOfUser.contains(adminRole == null ? null
-					: event.getGuild().getRoleById(adminRole));
+					: guild.getRoleById(adminRole));
 			isEventOrganizer = rolesOfUser.contains(eventOrganizerRole == null ? null
-					: event.getGuild().getRoleById(eventOrganizerRole));
+					: guild.getRoleById(eventOrganizerRole));
 			isInstructor = rolesOfUser.contains(instructorRole == null ? null
-					: event.getGuild().getRoleById(instructorRole));
+					: guild.getRoleById(instructorRole));
 		}
+		
 		boolean isOwner = event.getAuthor().getIdLong() == BotMain.ROLES.get("Owner");
 		isAdmin = isAdmin || isOwner; // Owner is also admin
 		
 		if (content.length() != 0 && content.charAt(0) == '!') {
 			logger.info("Received Message from " + event.getAuthor().getName() + " in channel "
-					+ channel.getName() + ": " + content);
+					+ channel.getName() + ": " + event.getMessage().getContentRaw());
 			String command;
 			content = content.substring(1);
 			if (content.indexOf(' ') != -1)

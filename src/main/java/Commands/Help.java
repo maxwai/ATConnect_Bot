@@ -47,7 +47,7 @@ public class Help {
 		
 		eb.setTitle("Commands:");
 		
-		eb.setDescription("List off all known Commands");
+		eb.setDescription("List of all known Commands");
 		
 		eb.addField("`!help`", "shows this page", true);
 		
