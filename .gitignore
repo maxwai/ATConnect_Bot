@@ -26,8 +26,4 @@ hs_err_pid*
 /gradle/
 /out/
 /build/
-Token.cfg
-Roles.cfg
-Countdowns.cfg
-Timezones.cfg
-Telegram.cfg
+Config.xml

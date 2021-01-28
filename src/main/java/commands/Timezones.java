@@ -2,7 +2,7 @@ package commands;
 
 import bot.BotEvents;
 import bot.BotMain;
-import bot.Config;
+import javax.annotation.Nonnull;
 import telegram.TelegramLogger;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import xml.XMLParser;
 
 public class Timezones {
 	
@@ -194,14 +195,14 @@ public class Timezones {
 	 * Save the Timezones in a File for use after restart
 	 */
 	public static void saveTimezones() {
-		Config.saveTimezones(timezones);
+		XMLParser.saveTimezones(timezones);
 	}
 	
 	/**
 	 * Load the Timezones from the File
 	 */
 	public static void loadTimezones() {
-		timezones = Config.getTimezones();
+		timezones = XMLParser.getTimezones();
 	}
 	
 	/**

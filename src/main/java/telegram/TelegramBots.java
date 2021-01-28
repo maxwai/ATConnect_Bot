@@ -1,7 +1,6 @@
 package telegram;
 
 import bot.BotMain;
-import bot.Config;
 import java.util.ArrayList;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
@@ -10,6 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.BotSession;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
+import xml.XMLParser;
 
 public class TelegramBots {
 	
@@ -21,7 +21,8 @@ public class TelegramBots {
 	private static String chatID;
 	
 	public static void setupBots() {
-		ArrayList<String[]> infos = Config.getTelegramInfo();
+		ArrayList<String[]> infos = XMLParser.getTelegramBots();
+		if(infos == null) return; // no Telegram Bot available
 		String usernameAll = infos.get(0)[0];
 		String tokenAll = infos.get(0)[1];
 		String usernameImportant = infos.get(1)[0];
@@ -64,7 +65,7 @@ public class TelegramBots {
 		}
 	}
 	
-	public static void sendLog(String clazz, String level, String message) {
+	static void sendLog(String clazz, String level, String message) {
 		message = level + "\n" + clazz + "\n\n" + message;
 		
 		if (chatID != null && botSessionImportant != null && botSessionAll != null) {
@@ -73,7 +74,7 @@ public class TelegramBots {
 		}
 	}
 	
-	public static void sendMessage(TelegramLongPollingBot bot, SendMessage message) {
+	private static void sendMessage(TelegramLongPollingBot bot, SendMessage message) {
 		try {
 			bot.execute(message);
 		} catch (TelegramApiException e) {
