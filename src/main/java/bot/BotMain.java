@@ -81,6 +81,7 @@ public class BotMain {
 	 */
 	public static void restartBot() {
 		disconnectBot(); // disconnect the Bot
+		initializeJDABuilder();
 		try {
 			connectBot(); // connect the Bot
 		} catch (LoginException e) {
