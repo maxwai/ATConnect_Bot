@@ -21,18 +21,47 @@ public class Help {
 	 * @param isEventOrganizer If this User is an Event Organizer
 	 * @param isAdmin If this User is an Admin
 	 * @param channel The Channel where the Command was send
+	 * @param content The Content of the Message that was send.
 	 */
 	public static void showHelp(boolean isInstructor, boolean isEventOrganizer, boolean isAdmin,
-			MessageChannel channel) {
-		EmbedBuilder eb = getHelpPage(); // get the Basic Help Page
-		if (isInstructor)
-			getInstructorHelpPage(eb); // attach Instructor only commands
-		if (isEventOrganizer)
-			getEventOrganizerHelpPage(eb); // attach Event Organizer only commands
-		if (isAdmin)
-			getAdminHelpPage(eb); // attach Admin only commands
-		logger.info("Sending Help page");
+			MessageChannel channel, String content) {
+		if (content.contains("event")) {
+			if (isEventOrganizer) {
+				sendEventHelpPage(channel);
+			}
+		} else {
+			EmbedBuilder eb = getHelpPage(); // get the Basic Help Page
+			if (isInstructor)
+				getInstructorHelpPage(eb); // attach Instructor only commands
+			if (isEventOrganizer)
+				getEventOrganizerHelpPage(eb); // attach Event Organizer only commands
+			if (isAdmin)
+				getAdminHelpPage(eb); // attach Admin only commands
+			logger.info("Sending Help page");
+			channel.sendMessage(eb.build()).queue(BotEvents::addTrashcan);
+		}
+	}
+	
+	public static void sendEventHelpPage(MessageChannel channel) {
+		EmbedBuilder eb = getEventPage();
+		logger.info("Sending Event Help Page");
 		channel.sendMessage(eb.build()).queue(BotEvents::addTrashcan);
+	}
+	
+	private static EmbedBuilder getEventPage() {
+		EmbedBuilder eb = new EmbedBuilder();
+		
+		eb.setColor(Color.YELLOW);
+		
+		eb.setTitle("Event Commands:");
+		
+		eb.setDescription("List of some Event Commands");
+		
+		eb.addField("More to come", "empty for now", false);
+		
+		eb.setTimestamp(Instant.now());
+		
+		return eb;
 	}
 	
 	/**
@@ -108,7 +137,9 @@ public class Help {
 				adds a countdown to the next event in the welcome channel
 				Syntax:
 				`!countdown DD.MM.YYYY HH:mm <additional Text>`
-				The time is always in UTC""", false);
+				The time is always in UTC""", true);
+		
+		eb.addField("`!event create`", "Will begin the creation of a new event", true);
 	}
 	
 	/**

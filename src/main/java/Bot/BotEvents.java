@@ -2,6 +2,7 @@ package Bot;
 
 import Commands.BotStatus;
 import Commands.Countdowns;
+import Commands.Event;
 import Commands.Help;
 import Commands.Ping;
 import Commands.Purge;
@@ -273,7 +274,7 @@ public class BotEvents {
 				command = content;
 			switch (command) {
 				case "help" -> Help.showHelp(isInstructor, isEventOrganizer, isAdmin,
-						channel); // show Help Page
+						channel, content); // show Help Page
 				case "ping" -> Ping.makePing(channel); // make a ping test
 				case "time" -> Timezones
 						.getTimezoneOfUserCommand(event, content); // get the Timezone of a User
@@ -283,6 +284,8 @@ public class BotEvents {
 						.makeUserTrained(isInstructor, event); // give a User the Trained Role
 				case "countdown" -> Countdowns.countdownCommand(isEventOrganizer, isOwner,
 						event); // create a live countdown
+				case "event" -> Event
+						.eventCommand(isEventOrganizer, isOwner, event, content); // event command
 				case "restart" -> BotStatus
 						.restartBot(isAdmin, channel); // restarts the Bot connection
 				case "reload" -> Reload.reloadMain(isAdmin, event,
