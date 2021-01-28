@@ -2,8 +2,6 @@ package commands;
 
 import bot.BotEvents;
 import bot.BotMain;
-import javax.annotation.Nonnull;
-import telegram.TelegramLogger;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -18,6 +16,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import telegram.TelegramLogger;
 import xml.XMLParser;
 
 public class Timezones {
@@ -93,47 +92,53 @@ public class Timezones {
 	 * @param event Event to get more information
 	 */
 	public static void getTimezoneOfAllUsersCommand(MessageReceivedEvent event) {
-		Map<String, ArrayList<String>> timezoneGroups = new HashMap<>(); // Hashmap with all different timezones
-		timezones.forEach((memberID, offset) -> {
-			ArrayList<String> members; // Get the correct Arraylist
-			if (timezoneGroups.containsKey(offset)) {
-				members = timezoneGroups.get(offset);
-			} else {
-				members = new ArrayList<>();
-				timezoneGroups.put(offset, members);
+		Guild guild = event.getJDA().getGuildById(
+				BotMain.ROLES.get("Guild")); // get the Guild where the Bot is deployed
+		if (guild != null) {
+			Map<String, ArrayList<String>> timezoneGroups = new HashMap<>(); // Hashmap with all different timezones
+			timezones.forEach((memberID, offset) -> {
+				ArrayList<String> members; // Get the correct Arraylist
+				if (timezoneGroups.containsKey(offset)) {
+					members = timezoneGroups.get(offset);
+				} else {
+					members = new ArrayList<>();
+					timezoneGroups.put(offset, members);
+				}
+				Member member = guild.getMemberById(memberID); // Get the Member with the given ID
+				if (member != null) {
+					members.add(BotEvents.getServerName(member));
+				}
+			});
+			
+			Map<Float, String> sortedTimezones = new TreeMap<>(); // sorted Map with all different timezones
+			timezoneGroups.forEach((offset, list) -> {
+				float offsetNumber; // true numeric Value of the offset for sorting purposes
+				if (offset.contains(":")) {
+					offsetNumber = Integer.parseInt(offset.substring(0, offset.indexOf(':')))
+							+ Integer.parseInt(offset.substring(offset.indexOf(':') + 1)) / 60f;
+				} else {
+					offsetNumber = Integer.parseInt(offset);
+				}
+				sortedTimezones.put(offsetNumber, offset);
+			});
+			
+			StringBuilder output = new StringBuilder("```\n");
+			for (Map.Entry<Float, String> entry : sortedTimezones.entrySet()) {
+				ZonedDateTime localTime = ZonedDateTime.now(ZoneOffset.of(entry.getValue()));
+				output.append(localTime.format(sdf))
+						.append(" (Z")
+						.append(entry.getValue())
+						.append("):\n"); // print the Timezone
+				timezoneGroups.get(entry.getValue()).forEach(member ->
+						output.append("\t")
+								.append(member).append("\n")); // print every user in this Timezone
+				output.append("\n");
 			}
-			Member member = event.getGuild().getMemberById(memberID); // Get the Member with the given ID
-			if (member != null) {
-				members.add(BotEvents.getServerName(member));
-			}
-		});
-		
-		Map<Float, String> sortedTimezones = new TreeMap<>(); // sorted Map with all different timezones
-		timezoneGroups.forEach((offset, list) -> {
-			float offsetNumber; // true numeric Value of the offset for sorting purposes
-			if (offset.contains(":")) {
-				offsetNumber = Integer.parseInt(offset.substring(0, offset.indexOf(':')))
-						+ Integer.parseInt(offset.substring(offset.indexOf(':') + 1)) / 60f;
-			} else {
-				offsetNumber = Integer.parseInt(offset);
-			}
-			sortedTimezones.put(offsetNumber, offset);
-		});
-		
-		StringBuilder output = new StringBuilder("```\n");
-		for (Map.Entry<Float, String> entry : sortedTimezones.entrySet()) {
-			ZonedDateTime localTime = ZonedDateTime.now(ZoneOffset.of(entry.getValue()));
-			output.append(localTime.format(sdf))
-					.append(" (Z")
-					.append(entry.getValue())
-					.append("):\n"); // print the Timezone
-			timezoneGroups.get(entry.getValue()).forEach(member ->
-					output.append("\t")
-							.append(member).append("\n")); // print every user in this Timezone
-			output.append("\n");
+			logger.info("Sending Timezones of all Users");
+			event.getChannel().sendMessage(output.append("```").toString()).queue();
+		} else { // The Guild ID given is not a Guild where the Bot is
+			logger.error("Bot is not on the specified Server");
 		}
-		logger.info("Sending Timezones of all Users");
-		event.getChannel().sendMessage(output.append("```").toString()).queue();
 	}
 	
 	/**
