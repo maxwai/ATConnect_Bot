@@ -28,6 +28,7 @@ import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 
 public class BotEvents {
@@ -123,6 +124,25 @@ public class BotEvents {
 	@SubscribeEvent
 	public void onShutdown(ShutdownEvent event) {
 		logger.warn("Discord Bot is shutting down");
+	}
+	
+	@SubscribeEvent
+	public void onPrivateEmoteAdded(MessageReactionAddEvent event) {
+		if (!event.isFromGuild()) {
+			if (event.getUser() == null || event.getUser().isBot()) return; // don't react if the bot is adding this emote
+			event.retrieveMessage().queue(message -> {
+						if (!message.getAuthor().isBot()) return; // delete only bot messages
+						if (event.getReactionEmote().isEmoji()) {
+							String emoji = event.getReactionEmote().getEmoji();
+							if (emoji.substring(0, emoji.length() - 1).equals("\uD83D\uDDD1")
+									|| emoji.equals("\uD83D\uDDD1")) { // :wastebasket:
+								TelegramLogger.getLogger("ReactionAdded")
+										.info("deleting message because of :wastebasket: reaction");
+								message.delete().queue(); // delete the message
+							}
+						}
+					});
+		}
 	}
 	
 	/**
