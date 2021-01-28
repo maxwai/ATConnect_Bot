@@ -246,9 +246,10 @@ public class XMLParser {
 		
 		Node timezonesNode;
 		// empty the timezone Node or create a new one if not present
-		if (timezonesNodeList.getLength() == 0)
+		if (timezonesNodeList.getLength() == 0) {
 			timezonesNode = doc.createElement(TIMEZONES_TAG);
-		else
+			doc.getFirstChild().appendChild(timezonesNode);
+		} else
 			timezonesNode = timezonesNodeList.item(0);
 		
 		clearNode(timezonesNode);
@@ -348,9 +349,10 @@ public class XMLParser {
 		Node countdownsNode;
 		if (countdownsNodeList.getLength() == 0) {
 			countdownsNode = doc.createElement(COUNTDOWNS_TAG);
-		} else {
+			doc.getFirstChild().appendChild(countdownsNode);
+		} else
 			countdownsNode = countdownsNodeList.item(0);
-		}
+		
 		clearNode(countdownsNode);
 		countdowns.forEach(countdownsThread -> {
 			String[] infos = countdownsThread.getInfos();
