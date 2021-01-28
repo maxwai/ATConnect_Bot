@@ -1,15 +1,15 @@
-package Bot;
+package bot;
 
-import Commands.BotStatus;
-import Commands.Countdowns;
-import Commands.Help;
-import Commands.Ping;
-import Commands.Purge;
-import Commands.Reload;
-import Commands.Timezones;
-import Commands.Trained;
-import TelegramBot.TelegramBots;
-import TelegramBot.TelegramLogger;
+import commands.BotStatus;
+import commands.Countdowns;
+import commands.Help;
+import commands.Ping;
+import commands.Purge;
+import commands.Reload;
+import commands.Timezones;
+import commands.Trained;
+import telegram.TelegramBots;
+import telegram.TelegramLogger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;

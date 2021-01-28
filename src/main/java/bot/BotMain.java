@@ -1,8 +1,8 @@
-package Bot;
+package bot;
 
-import Commands.Countdowns;
-import Commands.Timezones;
-import TelegramBot.TelegramBots;
+import commands.Countdowns;
+import commands.Timezones;
+import telegram.TelegramBots;
 import java.util.Map;
 import javax.security.auth.login.LoginException;
 import net.dv8tion.jda.api.JDA;

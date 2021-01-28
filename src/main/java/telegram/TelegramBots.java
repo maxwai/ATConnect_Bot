@@ -1,7 +1,7 @@
-package TelegramBot;
+package telegram;
 
-import Bot.BotMain;
-import Bot.Config;
+import bot.BotMain;
+import bot.Config;
 import java.util.ArrayList;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;

@@ -1,7 +1,7 @@
-package Bot;
+package bot;
 
-import Commands.Countdowns;
-import TelegramBot.TelegramLogger;
+import commands.Countdowns;
+import telegram.TelegramLogger;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;

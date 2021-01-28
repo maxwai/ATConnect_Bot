@@ -1,8 +1,8 @@
-package Commands;
+package commands;
 
-import Bot.BotEvents;
-import Bot.BotMain;
-import TelegramBot.TelegramLogger;
+import bot.BotEvents;
+import bot.BotMain;
+import telegram.TelegramLogger;
 import java.util.List;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Member;
