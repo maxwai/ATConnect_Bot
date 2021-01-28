@@ -46,8 +46,10 @@ public class TelegramBots {
 	
 	public static void closeBots() {
 		logger.info("Stopping all Telegram Bots");
-		botSessionAll.stop();
-		botSessionImportant.stop();
+		if(botSessionAll != null)
+			botSessionAll.stop();
+		if(botSessionImportant != null)
+			botSessionImportant.stop();
 	}
 	
 	public static void sendImportantLog(String clazz, String level, String message) {
