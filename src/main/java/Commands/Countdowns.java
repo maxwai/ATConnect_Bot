@@ -218,7 +218,7 @@ public class Countdowns {
 			this.channel = channel;
 			
 			logger.info("sending message");
-			channel.sendMessage(computeLeftTime()[0] + text).queue(message -> {
+			channel.sendMessage(computeLeftTime()[0] + " " + text).queue(message -> {
 				synchronized (lock) {
 					this.messageId = message.getId();
 					messageIds.push(this.messageId);
@@ -262,7 +262,7 @@ public class Countdowns {
 					return;
 				}
 				logger.info("editing message: " + info[0]);
-				channel.editMessageById(messageId, info[0] + text)
+				channel.editMessageById(messageId, info[0] + " " + text)
 						.queue(message -> {}, throwable -> {
 							// Message was deleted, delete this Thread
 							stop = true;
