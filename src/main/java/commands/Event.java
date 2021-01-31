@@ -23,7 +23,7 @@ public class Event {
 	/**
 	 * A Map of all Events in the system, mapped to the author ID
 	 */
-	private static final Map<Long, EventInstance> eventsBeingCreated = new HashMap<>();
+	private static final Map<Long, EventInstance> eventsMap = new HashMap<>();
 	
 	/**
 	 * The Logger for Log Messages
@@ -58,8 +58,8 @@ public class Event {
 								"You need to start the event from the channel where the event Text should be displayed")
 								.queue();
 				} else {
-					if (eventsBeingCreated.containsKey(event.getAuthor().getIdLong())) {
-						eventsBeingCreated.get(event.getAuthor().getIdLong())
+					if (eventsMap.containsKey(event.getAuthor().getIdLong())) {
+						eventsMap.get(event.getAuthor().getIdLong())
 								.update(event, command);
 					} else {
 						event.getChannel().sendMessage("You have to create an event first").queue();
@@ -75,7 +75,10 @@ public class Event {
 	
 	private static void createEvent(MessageReceivedEvent event) {
 		event.getMessage().delete().queue();
-		eventsBeingCreated.put(event.getAuthor().getIdLong(), new EventInstance(event));
+		if(eventsMap.containsKey(event.getAuthor().getIdLong()))
+			event.getChannel().sendMessage("You can only have one active event at a time").queue();
+		else
+			eventsMap.put(event.getAuthor().getIdLong(), new EventInstance(event));
 	}
 	
 	public static class EventInstance {
