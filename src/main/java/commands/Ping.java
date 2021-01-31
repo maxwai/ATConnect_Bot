@@ -1,6 +1,6 @@
-package Commands;
+package commands;
 
-import TelegramBot.TelegramLogger;
+import telegram.TelegramLogger;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 public class Ping {

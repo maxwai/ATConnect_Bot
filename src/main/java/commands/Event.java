@@ -1,7 +1,7 @@
-package Commands;
+package commands;
 
-import Bot.BotEvents;
-import TelegramBot.TelegramLogger;
+import bot.BotEvents;
+import telegram.TelegramLogger;
 import java.awt.Color;
 import java.time.DateTimeException;
 import java.time.Instant;

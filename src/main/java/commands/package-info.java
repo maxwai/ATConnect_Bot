@@ -3,4 +3,4 @@
  * <p>
  * Each Command (or command group) is an own Class
  */
-package Commands;
+package commands;

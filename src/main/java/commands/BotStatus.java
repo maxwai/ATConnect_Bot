@@ -1,8 +1,8 @@
-package Commands;
+package commands;
 
-import Bot.BotMain;
-import TelegramBot.TelegramBots;
-import TelegramBot.TelegramLogger;
+import bot.BotMain;
+import telegram.TelegramBots;
+import telegram.TelegramLogger;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 public class BotStatus {

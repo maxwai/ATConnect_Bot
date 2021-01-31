@@ -1,9 +1,9 @@
-package Commands;
+package commands;
 
-import Bot.BotEvents;
-import Bot.BotMain;
-import Bot.Config;
-import TelegramBot.TelegramLogger;
+import bot.BotEvents;
+import bot.BotMain;
+import bot.Config;
+import telegram.TelegramLogger;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;

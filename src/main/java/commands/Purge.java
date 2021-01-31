@@ -1,7 +1,7 @@
-package Commands;
+package commands;
 
-import Bot.BotEvents;
-import TelegramBot.TelegramLogger;
+import bot.BotEvents;
+import telegram.TelegramLogger;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 public class Purge {
