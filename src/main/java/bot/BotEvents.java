@@ -13,6 +13,7 @@ import emoji.Emoji;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import javax.annotation.Nullable;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -29,7 +30,9 @@ import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameE
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
+import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import telegram.TelegramBots;
 import telegram.TelegramLogger;
 
@@ -56,13 +59,14 @@ public class BotEvents {
 	 */
 	public static void deleteMessageAfterXTime(Message message, long seconds) {
 		new Thread(() -> {
-				try {
-					Thread.sleep(seconds * 1000);
-				} catch (InterruptedException ignored) {
-				}
-				message.delete().queue(); // delete the Message after X sec
+			try {
+				Thread.sleep(seconds * 1000);
+			} catch (InterruptedException ignored) {
+			}
+			// delete the Message after X sec
+			message.delete()
+					.queue(unused -> {}, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
 		}).start();
-		
 	}
 	
 	/**
@@ -72,7 +76,9 @@ public class BotEvents {
 	 *
 	 * @return Return the Nickname, or username if nickname is not available
 	 */
-	public static String getServerName(Member member) {
+	public static String getServerName(@Nullable Member member) {
+		if (member == null)
+			return "User-Not-Found";
 		String nickname = member.getNickname();
 		if (nickname == null)
 			nickname = member.getEffectiveName();
@@ -135,12 +141,15 @@ public class BotEvents {
 				return; // don't react if the bot is adding this emote
 			event.retrieveMessage().queue(message -> {
 				if (!message.getAuthor().isBot()) return; // delete only bot messages
-				if (event.getReactionEmote().isEmoji()) {
-					String emoji = event.getReactionEmote().getEmoji();
-					if (Emoji.getCleanedUpEmoji(emoji).equals(Emoji.WASTEBASKET)) {
-						TelegramLogger.getLogger("ReactionAdded")
-								.info("deleting message because of :wastebasket: reaction");
-						message.delete().queue(); // delete the message
+				if (!Event.reactionAdded(message, event.getReactionEmote(), event.getUser(),
+						event.getChannel())) {
+					if (event.getReactionEmote().isEmoji()) {
+						String emoji = Emoji.getCleanedUpEmoji(event.getReactionEmote().getEmoji());
+						if (emoji.equals(Emoji.WASTEBASKET)) {
+							TelegramLogger.getLogger("ReactionAdded")
+									.info("deleting message because of :wastebasket: reaction");
+							message.delete().queue(); // delete the message
+						}
 					}
 				}
 			});
@@ -153,7 +162,7 @@ public class BotEvents {
 	 * @param event Reaction add Event
 	 */
 	@SubscribeEvent
-	public void onEmoteAdded(GuildMessageReactionAddEvent event) {
+	public void onGuildEmoteAdded(GuildMessageReactionAddEvent event) {
 		if (event.getUser().isBot()) return; // don't react if the bot is adding this emote
 		Member authorMember = event.getGuild().getMember(event.getUser());
 		List<Role> rolesOfUser = authorMember != null ? authorMember.getRoles() : new ArrayList<>();
@@ -161,19 +170,25 @@ public class BotEvents {
 				rolesOfUser.contains(event.getGuild().getRoleById(BotMain.ROLES.get("Admin"))) ||
 						event.getUser().getIdLong() == BotMain.ROLES.get("Owner");
 		event.retrieveMessage()
-				.queue(message -> { // only do something if he is admin or the wastebasket was already here from the bot
-					if (!message.getAuthor().isBot()) return; // delete only bot messages
-					if ((isAdmin || message.getReactions().get(0).isSelf())
-							&& event.getReactionEmote().isEmoji()) {
-						String emoji = event.getReactionEmote().getEmoji();
-						if (Emoji.getCleanedUpEmoji(emoji).equals(Emoji.WASTEBASKET)) {
-							TelegramLogger.getLogger("ReactionAdded")
-									.info("deleting message because of :wastebasket: reaction");
-							// check if this message was part of a Countdown
-							if (Countdowns.messageIds.contains(message.getId()))
-								// close that countdown since the message will be deleted
-								Countdowns.closeSpecificThread(message.getId());
-							message.delete().queue(); // delete the message
+				.queue(message -> {
+					if (!message.getAuthor().isBot()) return; // only bot messages
+					// check if it is a reaction for an event
+					if (!Event.reactionAdded(message, event.getReactionEmote(), event.getUser(),
+							event.getChannel())) {
+						// only do something if he is admin or the wastebasket was already here from the bot
+						if ((isAdmin || message.getReactions().get(0).isSelf())
+								&& event.getReactionEmote().isEmoji()) {
+							String emoji = Emoji
+									.getCleanedUpEmoji(event.getReactionEmote().getEmoji());
+							if (emoji.equals(Emoji.WASTEBASKET)) {
+								TelegramLogger.getLogger("ReactionAdded")
+										.info("deleting message because of :wastebasket: reaction");
+								// check if this message was part of a Countdown
+								if (Countdowns.messageIds.contains(message.getId()))
+									// close that countdown since the message will be deleted
+									Countdowns.closeSpecificThread(message.getId());
+								message.delete().queue(); // delete the message
+							}
 						}
 					}
 				});

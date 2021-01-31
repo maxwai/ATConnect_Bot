@@ -13,7 +13,10 @@ public class Emoji {
 	public static final String CALENDAR_SPIRAL = "\uD83D\uDDD3";
 	public static final String CLOCK_2 = "\uD83D\uDD51";
 	
-	public static final String ZERO = "\u0030\u20E3";
+	public static final String X = "\u274C";
+	public static final String COUCH = "\uD83D\uDECB";
+	public static final String GREY_QUESTION = "\u2754";
+	
 	public static final String ONE = "\u0031\u20E3";
 	public static final String TWO = "\u0032\u20E3";
 	public static final String THREE = "\u0033\u20E3";

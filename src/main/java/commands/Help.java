@@ -43,15 +43,22 @@ public class Help {
 	}
 	
 	public static void sendEventHelpPage(MessageChannel channel) {
-		EmbedBuilder eb = getEventPage();
+		EmbedBuilder eb = getEventHelpPage();
 		logger.info("Sending Event Help Page");
 		channel.sendMessage(eb.build()).queue(BotEvents::addTrashcan);
 	}
 	
-	private static EmbedBuilder getEventPage() {
+	private static EmbedBuilder getBasicEmbedBuilder() {
 		EmbedBuilder eb = new EmbedBuilder();
 		
 		eb.setColor(Color.YELLOW);
+		eb.setTimestamp(Instant.now());
+		
+		return eb;
+	}
+	
+	private static EmbedBuilder getEventHelpPage() {
+		EmbedBuilder eb = getBasicEmbedBuilder();
 		
 		eb.setTitle("Event Commands:");
 		
@@ -66,7 +73,7 @@ public class Help {
 		eb.addField("`!event move #<channel>`",
 				"Will move the event embed to the mentioned channel", true);
 		
-		eb.setTimestamp(Instant.now());
+		eb.addField("`!event switch`", "To switch between Events", false);
 		
 		return eb;
 	}
@@ -77,9 +84,7 @@ public class Help {
 	 * @return The Basic Help Page, still needs to be Build
 	 */
 	private static EmbedBuilder getHelpPage() {
-		EmbedBuilder eb = new EmbedBuilder();
-		
-		eb.setColor(Color.YELLOW);
+		EmbedBuilder eb = getBasicEmbedBuilder();
 		
 		eb.setTitle("Commands:");
 		
@@ -97,8 +102,6 @@ public class Help {
 				Example layouts:
 				`!time User, User1`
 				`!time @User @User2`""", false);
-		
-		eb.setTimestamp(Instant.now());
 		
 		return eb;
 	}
@@ -171,7 +174,7 @@ public class Help {
 		eb.addField("`!restart`", "restarts the bot", true);
 		
 		// This Command should not be shown since only the Owner can do it.
-		// eb.addField("!stop", "stops the bot", true);
+		//eb.addField("!stop", "stops the bot", true);
 		
 		eb.addField("`!reload XY`", """
 				reloads all config files
@@ -179,11 +182,11 @@ public class Help {
 				`config`, `timezones`""", true);
 		
 		// This Command should not be shown since only the Owner can do it.
-
-//        eb.addField("`!purge`", """
-//                purges the given amount of Messages from the channel not including the command.
-//                Layout:
-//                `!purge 10`
-//                `!purge all`""", true);
+		
+		//eb.addField("`!purge`", """
+		//		purges the given amount of Messages from the channel not including the command.
+		//		Layout:
+		//		`!purge 10`
+		//		`!purge all`""", true);
 	}
 }
