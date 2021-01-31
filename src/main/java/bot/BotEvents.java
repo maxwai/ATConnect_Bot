@@ -9,8 +9,7 @@ import commands.Purge;
 import commands.Reload;
 import commands.Timezones;
 import commands.Trained;
-import telegram.TelegramBots;
-import telegram.TelegramLogger;
+import emoji.Emoji;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -31,6 +30,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
+import telegram.TelegramBots;
+import telegram.TelegramLogger;
 
 public class BotEvents {
 	
@@ -43,8 +44,8 @@ public class BotEvents {
 	 * @param message The message where the Trashcan should be added
 	 */
 	public static void addTrashcan(Message message) {
-		message.addReaction("\uD83D\uDDD1")
-				.queue(); // add a reaction to make it easy to delete the post
+		// add a reaction to make it easy to delete the post
+		message.addReaction(Emoji.WASTEBASKET).queue();
 	}
 	
 	/**
@@ -82,7 +83,8 @@ public class BotEvents {
 				Thread.sleep(60000);
 				logger.error("Discord Bot Disconnected");
 				shutdownThread = null;
-			} catch (InterruptedException ignored) {}
+			} catch (InterruptedException ignored) {
+			}
 		});
 		shutdownThread.start();
 	}
@@ -126,19 +128,19 @@ public class BotEvents {
 	@SubscribeEvent
 	public void onPrivateEmoteAdded(MessageReactionAddEvent event) {
 		if (!event.isFromGuild()) {
-			if (event.getUser() == null || event.getUser().isBot()) return; // don't react if the bot is adding this emote
+			if (event.getUser() == null || event.getUser().isBot())
+				return; // don't react if the bot is adding this emote
 			event.retrieveMessage().queue(message -> {
-						if (!message.getAuthor().isBot()) return; // delete only bot messages
-						if (event.getReactionEmote().isEmoji()) {
-							String emoji = event.getReactionEmote().getEmoji();
-							if (emoji.substring(0, emoji.length() - 1).equals("\uD83D\uDDD1")
-									|| emoji.equals("\uD83D\uDDD1")) { // :wastebasket:
-								TelegramLogger.getLogger("ReactionAdded")
-										.info("deleting message because of :wastebasket: reaction");
-								message.delete().queue(); // delete the message
-							}
-						}
-					});
+				if (!message.getAuthor().isBot()) return; // delete only bot messages
+				if (event.getReactionEmote().isEmoji()) {
+					String emoji = event.getReactionEmote().getEmoji();
+					if (Emoji.getCleanedUpEmoji(emoji).equals(Emoji.WASTEBASKET)) {
+						TelegramLogger.getLogger("ReactionAdded")
+								.info("deleting message because of :wastebasket: reaction");
+						message.delete().queue(); // delete the message
+					}
+				}
+			});
 		}
 	}
 	
@@ -161,8 +163,7 @@ public class BotEvents {
 					if ((isAdmin || message.getReactions().get(0).isSelf())
 							&& event.getReactionEmote().isEmoji()) {
 						String emoji = event.getReactionEmote().getEmoji();
-						if (emoji.substring(0, emoji.length() - 1).equals("\uD83D\uDDD1")
-								|| emoji.equals("\uD83D\uDDD1")) { // :wastebasket:
+						if (Emoji.getCleanedUpEmoji(emoji).equals(Emoji.WASTEBASKET)) {
 							TelegramLogger.getLogger("ReactionAdded")
 									.info("deleting message because of :wastebasket: reaction");
 							// check if this message was part of a Countdown

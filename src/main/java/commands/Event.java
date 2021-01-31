@@ -1,6 +1,7 @@
 package commands;
 
 import bot.BotEvents;
+import emoji.Emoji;
 import telegram.TelegramLogger;
 import java.awt.Color;
 import java.time.DateTimeException;
@@ -275,9 +276,9 @@ public class Event {
 				eb.setTimestamp(startTime);
 			}
 			
-			String eventInfo = "\uD83D\uDDD3\uFE0F "; // add calender Emoji
+			String eventInfo = Emoji.CALENDAR_SPIRAL + " "; // add calender Emoji
 			eventInfo += (startTime != null ? sdfDate.format(startTime) : notSet) + "\n";
-			eventInfo += "\uD83D\uDD51 "; // add clock Emoji
+			eventInfo += Emoji.CLOCK_2 + " "; // add clock Emoji
 			eventInfo += (startTime != null ? sdfTime.format(startTime) : notSet) + " - ";
 			eventInfo += (stopTime != null ? sdfTime.format(stopTime) : notSet) + " [Z+0]";
 			
