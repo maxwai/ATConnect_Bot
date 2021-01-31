@@ -81,9 +81,7 @@ public class BotEvents {
 				Thread.sleep(60000);
 				logger.error("Discord Bot Disconnected");
 				shutdownThread = null;
-			} catch (InterruptedException ignored) {
-				logger.info("Discord Bot Disconnected");
-			}
+			} catch (InterruptedException ignored) {}
 		});
 		shutdownThread.start();
 	}
@@ -107,7 +105,6 @@ public class BotEvents {
 	public void onResumed(ResumedEvent event) {
 		if (shutdownThread != null) {
 			shutdownThread.interrupt();
-			logger.info("Discord Bot connection Resumed");
 		} else
 			logger.warn("Discord Bot connection Resumed");
 	}
@@ -116,7 +113,6 @@ public class BotEvents {
 	public void onReconnected(ReconnectedEvent event) {
 		if (shutdownThread != null) {
 			shutdownThread.interrupt();
-			logger.info("Discord Bot reconnected successfully");
 		} else
 			logger.warn("Discord Bot reconnected successfully");
 	}
