@@ -1,11 +1,11 @@
 package commands;
 
 import bot.BotEvents;
-import telegram.TelegramLogger;
 import java.awt.Color;
 import java.time.Instant;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import telegram.TelegramLogger;
 
 public class Help {
 	
@@ -57,7 +57,14 @@ public class Help {
 		
 		eb.setDescription("List of some Event Commands");
 		
-		eb.addField("More to come", "empty for now", false);
+		eb.addField("`!event create`", "Will begin the creation of a new event", true);
+		
+		eb.addField("`!event vote`", "Will toggle on/off the voting for the positions", true);
+		
+		eb.addField("`!event delete`", "Will delete your event", true);
+		
+		eb.addField("`!event move #<channel>`",
+				"Will move the event embed to the mentioned channel", true);
 		
 		eb.setTimestamp(Instant.now());
 		
@@ -137,7 +144,10 @@ public class Help {
 				adds a countdown to the next event in the welcome channel
 				Syntax:
 				`!countdown DD.MM.YYYY HH:mm <additional Text>`
-				The time is always in UTC""", true);
+				The time is always in UTC""", false);
+		
+		eb.addField("`!help event`", "Will show the help page for event commands",
+				true);
 		
 		eb.addField("`!event create`", "Will begin the creation of a new event", true);
 	}
