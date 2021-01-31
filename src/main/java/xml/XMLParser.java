@@ -305,7 +305,7 @@ public class XMLParser {
 		} else if (nList.getLength() == 0)
 			logger.warn("No Telegram Bot information. You won't get the Telegram Logs");
 		else
-			xmlFormatException("multiple or no Telegram Tags");
+			xmlFormatException("multiple Telegram Tags");
 		return null;
 	}
 	
