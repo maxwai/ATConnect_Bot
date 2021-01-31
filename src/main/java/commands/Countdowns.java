@@ -1,7 +1,6 @@
 package commands;
 
 import bot.BotEvents;
-import bot.Config;
 import telegram.TelegramLogger;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -11,6 +10,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import xml.XMLParser;
 
 public class Countdowns {
 	
@@ -85,7 +85,6 @@ public class Countdowns {
 			CountdownsThread countdownsThread = new CountdownsThread(channel, text, date);
 			countdownsThread.start();
 			countdowns.push(countdownsThread);
-			saveAllCountdowns(); // save the countdown in the event of unexpected failure
 		} catch (NumberFormatException | StringIndexOutOfBoundsException ignored) { // The command had some parsing error
 			channel.sendMessage("Something went wrong with your command try again\n" +
 					"Format is: `!countdown DD.MM.YYYY HH:mm <additional Text>`").queue();
@@ -98,7 +97,7 @@ public class Countdowns {
 	 * @param jda The JDA to get the Channels and Messages
 	 */
 	public static void restartCountdowns(JDA jda) {
-		Config.getCountdowns().forEach(countdownInfos -> {
+		XMLParser.getCountdowns().forEach(countdownInfos -> {
 			// Pick up the channel where the Message is
 			TextChannel channel = jda.getTextChannelById(countdownInfos[0]);
 			if (channel
@@ -131,7 +130,7 @@ public class Countdowns {
 	 * Save all active Countdowns in the Countdowns.cfg
 	 */
 	private static void saveAllCountdowns() {
-		Config.saveCountdowns(countdowns);
+		XMLParser.saveCountdowns(countdowns);
 	}
 	
 	/**
@@ -146,6 +145,7 @@ public class Countdowns {
 		thread.interrupt();
 		countdowns.remove(index);
 		messageIds.remove(index);
+		saveAllCountdowns();
 	}
 	
 	/**
@@ -220,6 +220,7 @@ public class Countdowns {
 				synchronized (lock) {
 					this.messageId = message.getId();
 					messageIds.push(this.messageId);
+					saveAllCountdowns(); // save the countdown in the event of unexpected failure
 					lock.notify(); // notify the Thread that the Message Id is available
 				}
 			});

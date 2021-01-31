@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.hooks.AnnotatedEventManager;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
+import xml.XMLParser;
 
 public class BotMain {
 	
@@ -27,12 +28,12 @@ public class BotMain {
 	/**
 	 * Token of the Bot, Fetch with the Token.cfg file
 	 */
-	public static String TOKEN = Config.getToken();
+	public static String TOKEN = XMLParser.getBotToken();
 	/**
 	 * Map of special Role IDs:
 	 * Admin, Owner, Event Organizer
 	 */
-	public static Map<String, Long> ROLES = Config.getRoles();
+	public static Map<String, Long> ROLES = XMLParser.getRoles();
 	/**
 	 * {@link JDA} Instance of the Bot
 	 */
@@ -71,8 +72,8 @@ public class BotMain {
 	 * Will reload the Configs (without the Countdowns and Timezones)
 	 */
 	public static void reloadConfig() {
-		TOKEN = Config.getToken();
-		ROLES = Config.getRoles();
+		TOKEN = XMLParser.getBotToken();
+		ROLES = XMLParser.getRoles();
 	}
 	
 	/**
@@ -80,6 +81,7 @@ public class BotMain {
 	 */
 	public static void restartBot() {
 		disconnectBot(); // disconnect the Bot
+		initializeJDABuilder();
 		try {
 			connectBot(); // connect the Bot
 		} catch (LoginException e) {
