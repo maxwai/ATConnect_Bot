@@ -55,11 +55,14 @@ public class BotEvents {
 	 * @param seconds Time until the message should be deleted
 	 */
 	public static void deleteMessageAfterXTime(Message message, long seconds) {
-		try {
-			Thread.sleep(seconds * 1000);
-		} catch (InterruptedException ignored) {
-		}
-		message.delete().queue(); // delete the Message after X sec
+		new Thread(() -> {
+				try {
+					Thread.sleep(seconds * 1000);
+				} catch (InterruptedException ignored) {
+				}
+				message.delete().queue(); // delete the Message after X sec
+		}).start();
+		
 	}
 	
 	/**
