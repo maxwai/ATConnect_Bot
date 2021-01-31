@@ -2,7 +2,6 @@ package commands;
 
 import bot.BotEvents;
 import emoji.Emoji;
-import telegram.TelegramLogger;
 import java.awt.Color;
 import java.time.DateTimeException;
 import java.time.Instant;
@@ -10,13 +9,18 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.MessageReaction;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import telegram.TelegramLogger;
 
 public class Event {
 	
@@ -57,6 +61,12 @@ public class Event {
 						event.getChannel().sendMessage(
 								"You need to start the event from the channel where the event Text should be displayed")
 								.queue();
+				} else if (command.equals("delete")) { //delete the event
+					if (eventsMap.containsKey(event.getAuthor().getIdLong())) {
+						eventsMap.get(event.getAuthor().getIdLong()).deleteEvent();
+						eventsMap.remove(event.getAuthor().getIdLong());
+					} else
+						event.getChannel().sendMessage("You don't have an event setup").queue();
 				} else {
 					if (eventsMap.containsKey(event.getAuthor().getIdLong())) {
 						eventsMap.get(event.getAuthor().getIdLong())
@@ -75,7 +85,7 @@ public class Event {
 	
 	private static void createEvent(MessageReceivedEvent event) {
 		event.getMessage().delete().queue();
-		if(eventsMap.containsKey(event.getAuthor().getIdLong()))
+		if (eventsMap.containsKey(event.getAuthor().getIdLong()))
 			event.getChannel().sendMessage("You can only have one active event at a time").queue();
 		else
 			eventsMap.put(event.getAuthor().getIdLong(), new EventInstance(event));
@@ -122,27 +132,38 @@ public class Event {
 				.setDescription("Here is the List of commands you should do next")
 				.addField("`!event location`", """
 						Adds an Airport and it's positions
-						`!event location <Airport Code>: <Pos1>, <Pos2>, ...`""", false)
+						`!event location <Airport Code>: <Pos1>, <Pos2>, ...`
+						`!event location delete` Will delete all Locations""", false)
 				.addField("`!event toggle XY`", """
 						Toggle the special Positions
 						Special Positions:
 						`Maybe`, `Backup`
 						`!event toggle maybe`""", false)
+				.addField("`!event vote`", "Will toggle on/off the voting for the positions", false)
+				.addField("`!event previous`", "Shows the previous page of Help", false)
 				.build();
 		
 		private static final String notSet = "Not Set";
+		
 		private final ArrayList<ArrayList<String>> locations = new ArrayList<>();
+		
 		private String title;
 		private String description;
+		
 		private TemporalAccessor startTime;
 		private TemporalAccessor stopTime;
-		private int currentPage = 1;
+		private boolean setEventDate = false;
+		private boolean setStartTime = false;
+		private boolean setEndTime = false;
+		
 		private boolean maybeToggle = true;
 		private boolean backupToggle = true;
+		private boolean vote = false;
 		
 		private Message commandsMessage;
 		private Message eventEmbedMessage;
 		private Message eventPrivateEmbedMessage;
+		private MessageChannel eventEmbedMessageChannel;
 		
 		
 		private EventInstance(MessageReceivedEvent event) {
@@ -157,6 +178,7 @@ public class Event {
 								.queue(message -> eventPrivateEmbedMessage = message);
 					});
 			event.getChannel().sendMessage(embed).queue(message -> eventEmbedMessage = message);
+			eventEmbedMessageChannel = event.getChannel();
 		}
 		
 		private static TemporalAccessor setTime(MessageReceivedEvent event, String argument,
@@ -175,6 +197,10 @@ public class Event {
 				}
 			}
 			return time;
+		}
+		
+		private void deleteEvent() {
+			eventEmbedMessage.delete().queue();
 		}
 		
 		private void update(MessageReceivedEvent event, String command) {
@@ -201,6 +227,7 @@ public class Event {
 							
 							startTime = sdfComplete.parse(content + " " + timeStart);
 							stopTime = sdfComplete.parse(content + " " + timeStop);
+							setEventDate = true;
 						} catch (DateTimeException | NumberFormatException e) {
 							event.getChannel().sendMessage("Date is not in the wanted Format")
 									.queue(message -> BotEvents
@@ -208,33 +235,47 @@ public class Event {
 						}
 					}
 				}
-				case "start" -> startTime = setTime(event, content, startTime);
-				case "end", "stop" -> stopTime = setTime(event, content, stopTime);
+				case "start" -> {
+					startTime = setTime(event, content, startTime);
+					setStartTime = true;
+				}
+				case "end", "stop" -> {
+					stopTime = setTime(event, content, stopTime);
+					setEndTime = true;
+				}
 				case "location" -> {
 					if (content != null) {
-						try {
-							ArrayList<String> positions = new ArrayList<>();
-							positions.add(content.substring(0, content.indexOf(':')));
-							content = content.substring(content.indexOf(':') + 1);
-							if (content.charAt(0) == ' ')
-								content = content.substring(1);
-							while (!content.equals("")) {
-								if (content.contains(",")) {
-									positions.add(content.substring(0, content.indexOf(",")));
-									content = content.substring(content.indexOf(",") + 1);
-								} else {
-									positions.add(content);
-									content = "";
-								}
-								if (!content.equals("") && content.charAt(0) == ' ')
-									content = content.substring(1);
-							}
-							locations.add(positions);
-						} catch (IndexOutOfBoundsException e) {
-							event.getChannel()
-									.sendMessage("The command was not how it was expected")
+						if (content.equals("delete")) { // delete all locations
+							locations.clear();
+						} else if (locations.size() == 10) { // location amount is reached
+							event.getChannel().sendMessage("You can't have more than 10 locations")
 									.queue(message -> BotEvents
 											.deleteMessageAfterXTime(message, 5));
+						} else { // add a new location
+							try {
+								ArrayList<String> positions = new ArrayList<>();
+								positions.add(content.substring(0, content.indexOf(':')));
+								content = content.substring(content.indexOf(':') + 1);
+								if (content.charAt(0) == ' ')
+									content = content.substring(1);
+								while (!content.equals("")) {
+									if (content.contains(",")) {
+										positions.add(content.substring(0, content.indexOf(",")));
+										content = content.substring(content.indexOf(",") + 1);
+									} else {
+										positions.add(content);
+										content = "";
+									}
+									if (!content.equals("") && content.charAt(0) == ' ')
+										content = content.substring(1);
+								}
+								locations.add(positions);
+							} catch (IndexOutOfBoundsException e) {
+								event.getChannel()
+										.sendMessage("The command was not how it was expected")
+										.queue(message -> BotEvents
+												.deleteMessageAfterXTime(message, 5));
+							}
 						}
 					}
 				}
@@ -249,23 +290,66 @@ public class Event {
 						}
 					}
 				}
-				case "next" -> {
-					if (currentPage == 1) {
-						commandsMessage.editMessage(embed2).queue();
-						currentPage++;
-					}
+				case "next" -> commandsMessage.editMessage(embed2).queue();
+				case "previous" -> commandsMessage.editMessage(embed1).queue();
+				case "vote" -> vote = !vote;
+				case "move" -> {
+					if (event.isFromGuild()) {
+						List<TextChannel> mentionedChannels = event.getMessage()
+								.getMentionedChannels();
+						if (mentionedChannels.size() == 1) {
+							eventEmbedMessage.delete().queue();
+							eventEmbedMessageChannel = mentionedChannels.get(0);
+							Object lock = new Object();
+							eventEmbedMessageChannel.sendMessage(getEventEmbed())
+									.queue(message -> {
+										eventEmbedMessage = message;
+										synchronized (lock) {
+											lock.notify();
+										}
+									});
+							try {
+								synchronized (lock) {
+									lock.wait(5000);
+								}
+							} catch (InterruptedException ignored) {
+							}
+						} else
+							event.getChannel()
+									.sendMessage("You have to mention exactly one Channel").queue();
+					} else
+						event.getChannel().sendMessage("You have to send this command in a Guild")
+								.queue();
 				}
-				/*
-				 TODO:
-				  - move message to different channel
-				  - add emojis next to name
-				 */
 				default -> event.getChannel().sendMessage("You tried an unknown command")
 						.queue(message -> BotEvents.deleteMessageAfterXTime(message, 5));
 			}
 			MessageEmbed embed = getEventEmbed();
-			eventEmbedMessage.editMessage(embed).queue();
+			eventEmbedMessage.editMessage(embed).queue(ignored -> addReactions(event));
 			eventPrivateEmbedMessage.editMessage(embed).queue();
+		}
+		
+		private void addReactions(MessageReceivedEvent event) {
+			// we need to retrieve the message since Reactions are immutable
+			eventEmbedMessageChannel.retrieveMessageById(eventEmbedMessage.getIdLong())
+					.queue(message -> {
+						List<MessageReaction> reactions = message.getReactions();
+						// remove every reaction
+						reactions.forEach(messageReaction -> message.removeReaction(
+									messageReaction.getReactionEmote().getAsReactionCode())
+									.queue(unused -> {}, Throwable::printStackTrace));
+						
+						// add the reactions if toggled
+						if (vote && locations.size() != 0) {
+							int i = 0;
+							if (locations.size() == 10) {
+								message.addReaction(Emoji.ZERO).queue();
+								i = 1;
+							}
+							for (; i < locations.size(); i++)
+								message.addReaction(Emoji.numbersList.get(i)).queue();
+						}
+					});
 		}
 		
 		private MessageEmbed getEventEmbed() {
@@ -275,23 +359,30 @@ public class Event {
 			
 			eb.setColor(Color.CYAN);
 			
-			if (startTime != null) {
+			if (setStartTime) {
 				eb.setTimestamp(startTime);
 			}
 			
 			String eventInfo = Emoji.CALENDAR_SPIRAL + " "; // add calender Emoji
-			eventInfo += (startTime != null ? sdfDate.format(startTime) : notSet) + "\n";
+			eventInfo += (setEventDate ? sdfDate.format(startTime) : notSet) + "\n";
 			eventInfo += Emoji.CLOCK_2 + " "; // add clock Emoji
-			eventInfo += (startTime != null ? sdfTime.format(startTime) : notSet) + " - ";
-			eventInfo += (stopTime != null ? sdfTime.format(stopTime) : notSet) + " [Z+0]";
+			eventInfo += (setStartTime ? sdfTime.format(startTime) : notSet) + " - ";
+			eventInfo += (setEndTime ? sdfTime.format(stopTime) : notSet) + " [Z+0]";
 			
 			eb.addField("Event Info:", eventInfo, false);
 			
 			eb.addField("Description", description == null ? notSet : description, false);
 			
 			if (locations.size() != 0) {
-				locations.forEach(positions -> eb.addField(positions.get(0) + " (0)",
-						"-", true));
+				int i = 0;
+				if (locations.size() == 10) {
+					eb.addField(Emoji.ZERO + " " + locations.get(0).get(0) + " (0)", "-", true);
+					i = 1;
+				}
+				for (; i < locations.size(); i++) {
+					String emoji = Emoji.numbersList.get(i);
+					eb.addField(emoji + " " + locations.get(i).get(0) + " (0)", "-", true);
+				}
 			}
 			
 			eb.addBlankField(false);
