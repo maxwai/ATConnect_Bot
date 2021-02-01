@@ -37,7 +37,7 @@ to fill it)
 - [X] Possibility to add the Trained Role to Users for Instructors
 - [X] Get the Logs via 2 Telegram Bots
 - [X] Change the Config to XML
-- [ ] Event functionality where users can choose their position
+- [X] Event functionality where users can choose their position
 
 ## License [![GitHub license](https://badgen.net/github/license/maxwai/ATConnect_Bot)](LICENSE)
 
