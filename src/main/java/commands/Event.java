@@ -10,8 +10,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.RejectedExecutionException;
 import javax.annotation.Nonnull;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -21,6 +23,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 import telegram.TelegramLogger;
+import xml.XMLParser;
 
 public class Event {
 	
@@ -112,6 +115,17 @@ public class Event {
 			}
 		} else // isn't Event Organizer or Owner
 			event.getChannel().sendMessage("You don't have permission for this command").queue();
+	}
+	
+	/**
+	 * Saves all Events to the Config.xml
+	 */
+	public static void saveEvents() {
+		XMLParser.saveEvents(eventsMap);
+	}
+	
+	public static void loadEvents(@Nonnull JDA jda) {
+		eventsMap.putAll(XMLParser.getEvents(jda));
 	}
 	
 	/**

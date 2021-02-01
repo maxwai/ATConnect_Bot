@@ -31,24 +31,26 @@ import telegram.TelegramLogger;
 public class EventInstance {
 	
 	/**
-	 * The Logger for Log Messages
+	 * The default String when a parameter is not set
 	 */
-	private static final TelegramLogger logger = TelegramLogger.getLogger("Event Instance");
-	
+	public static final String notSet = "Not Set";
 	/**
 	 * Date Format for the input and output of the event Date
 	 */
-	private static final DateTimeFormatter sdfDate = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+	public static final DateTimeFormatter sdfDate = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 	/**
 	 * Date Format for the input and output of the event Time
 	 */
-	private static final DateTimeFormatter sdfTime = DateTimeFormatter.ofPattern("HH:mm");
+	public static final DateTimeFormatter sdfTime = DateTimeFormatter.ofPattern("HH:mm");
 	/**
 	 * Date Format for how to output the whole Date
 	 */
-	private static final DateTimeFormatter sdfComplete = DateTimeFormatter
+	public static final DateTimeFormatter sdfComplete = DateTimeFormatter
 			.ofPattern("dd.MM.yyyy HH:mm");
-	
+	/**
+	 * The Logger for Log Messages
+	 */
+	private static final TelegramLogger logger = TelegramLogger.getLogger("Event Instance");
 	/**
 	 * First Embed Help Page of creating the Event
 	 */
@@ -71,7 +73,6 @@ public class EventInstance {
 					`!event end HH:mm`""", false)
 			.addField("`!event next`", "Shows the next page of Help", false)
 			.build();
-	
 	/**
 	 * Second Embed Help Page of creating the Event
 	 */
@@ -93,12 +94,6 @@ public class EventInstance {
 			.addField("`!event previous`", "Shows the previous page of Help", false)
 			.addField("", "Get more help with `!help event`", false)
 			.build();
-	
-	/**
-	 * The default String when a parameter is not set
-	 */
-	private static final String notSet = "Not Set";
-	
 	/**
 	 * List of all locations in this Event
 	 */
@@ -106,20 +101,49 @@ public class EventInstance {
 	/**
 	 * Saved Guild Instance where the Event Embed is posted
 	 */
-	private final Guild guild;
-	
+	public final Guild guild;
 	/**
 	 * All Users that have the maybe Position
 	 */
-	private final ArrayList<Long> maybeUsers = new ArrayList<>();
+	public final ArrayList<Long> maybeUsers = new ArrayList<>();
 	/**
 	 * All Users that have the backup Position
 	 */
-	private final ArrayList<Long> backupUsers = new ArrayList<>();
+	public final ArrayList<Long> backupUsers = new ArrayList<>();
+	/**
+	 * Toggle for the maybe position
+	 */
+	public boolean maybeToggle = true;
+	/**
+	 * Toggle for the backup position
+	 */
+	public boolean backupToggle = true;
+	/**
+	 * Toggle if voting is open or not
+	 */
+	public boolean vote = false;
 	/**
 	 * The Message Instance in the Guild with the Event Embed
+	 * <p>
+	 * TODO: check if messages are deleted
 	 */
 	public Message eventEmbedMessage;
+	/**
+	 * The Message Instance in the Private Chat where the Help page is shown
+	 * <p>
+	 * TODO: check if messages are deleted
+	 */
+	public Message commandsMessage;
+	/**
+	 * The Message Instance in the Private Chat with the Event Embed
+	 * <p>
+	 * TODO: check if messages are deleted
+	 */
+	public Message eventPrivateEmbedMessage;
+	/**
+	 * The Channel in the Guild where the Event Embed is supposed to be
+	 */
+	public MessageChannel eventEmbedMessageChannel;
 	/**
 	 * The Title of the Event
 	 */
@@ -148,31 +172,56 @@ public class EventInstance {
 	 * Boolean to know if the end Time is already Set
 	 */
 	private boolean setEndTime = false;
+	
 	/**
-	 * Toggle for the maybe position
+	 * This is the constructor for when an Event is retrieved by the XML Parser
+	 *
+	 * @param guild The Guild
+	 * @param title The Title
+	 * @param desc The Description
+	 * @param startTime The Start Time
+	 * @param stopTime The Stop Time
+	 * @param eventDateSet If the event Date was set
+	 * @param startTimeSet If the start Time was set
+	 * @param stopTimeSet If the stop Time was set
+	 * @param maybeToggle If maybe position is on/off
+	 * @param backupToggle If backup position is on/off
+	 * @param vote If voting is on/off
+	 * @param commandsMessage The Message in the Private Chat with the Commands
+	 * @param eventPrivateEmbedMessage The Embed Message in the Private Chat
+	 * @param eventEmbedMessage The Embed Message with the Event
+	 * @param eventEmbedMessageChannel The Channel where Event Embed is
+	 * @param maybeUsers The Users in the maybe position
+	 * @param backupUsers The Users in the backup position
+	 * @param locations The Location Instances
 	 */
-	private boolean maybeToggle = true;
-	/**
-	 * Toggle for the backup position
-	 */
-	private boolean backupToggle = true;
-	/**
-	 * Toggle if voting is open or not
-	 */
-	private boolean vote = false;
-	/**
-	 * The Message Instance in the Private Chat where the Help page is shown //TODO: check id
-	 * messages are deleted
-	 */
-	private Message commandsMessage;
-	/**
-	 * The Message Instance in the Private Chat with the Event Embed
-	 */
-	private Message eventPrivateEmbedMessage;
-	/**
-	 * The Channel in the Guild where the Event Embed is supposed to be
-	 */
-	private MessageChannel eventEmbedMessageChannel;
+	public EventInstance(@Nonnull Guild guild, @Nonnull String title, @Nonnull String desc,
+			@Nullable TemporalAccessor startTime, @Nullable TemporalAccessor stopTime,
+			boolean eventDateSet, boolean startTimeSet, boolean stopTimeSet, boolean maybeToggle,
+			boolean backupToggle, boolean vote, @Nonnull Message commandsMessage,
+			@Nonnull Message eventPrivateEmbedMessage, @Nonnull Message eventEmbedMessage,
+			@Nonnull MessageChannel eventEmbedMessageChannel, @Nonnull ArrayList<Long> maybeUsers,
+			@Nonnull ArrayList<Long> backupUsers, @Nonnull ArrayList<Location> locations) {
+		this.guild = guild;
+		this.title = title;
+		this.description = desc;
+		this.startTime = startTime;
+		this.stopTime = stopTime;
+		this.setEventDate = eventDateSet;
+		this.setStartTime = startTimeSet;
+		this.setEndTime = stopTimeSet;
+		this.maybeToggle = maybeToggle;
+		this.backupToggle = backupToggle;
+		this.vote = vote;
+		this.commandsMessage = commandsMessage;
+		this.eventPrivateEmbedMessage = eventPrivateEmbedMessage;
+		this.eventEmbedMessage = eventEmbedMessage;
+		this.eventEmbedMessageChannel = eventEmbedMessageChannel;
+		this.maybeUsers.addAll(maybeUsers);
+		this.backupUsers.addAll(backupUsers);
+		this.locations.addAll(locations);
+		this.locations.forEach(location -> location.updateGuildAndParent(guild, this));
+	}
 	
 	/**
 	 * Creates an Event:
@@ -538,6 +587,37 @@ public class EventInstance {
 	}
 	
 	/**
+	 * Returns the Event Date in a String representation
+	 *
+	 * @return The String representation of the Event Date or {@link #notSet} if null
+	 */
+	@Nonnull
+	public String getEventDate() {
+		return setEventDate ? sdfDate.format(startTime) : notSet;
+	}
+	
+	/**
+	 * Returns the Start Time in a String representation
+	 *
+	 * @return The String representation of the Start Time or {@link #notSet} if null
+	 */
+	@Nonnull
+	public String getStartTime() {
+		return setStartTime ? sdfTime.format(startTime) : notSet;
+	}
+	
+	/**
+	 * Returns the Stop Time in a String representation
+	 *
+	 * @return The String representation of the Stop Time or {@link #notSet} if null
+	 */
+	@Nonnull
+	public String getStopTime() {
+		return setEndTime ? sdfTime.format(stopTime) : notSet;
+	}
+	
+	
+	/**
 	 * Will return the Embed for the Event
 	 *
 	 * @return The Event Embed
@@ -555,10 +635,10 @@ public class EventInstance {
 		}
 		
 		String eventInfo = Emoji.CALENDAR_SPIRAL + " "; // add calender Emoji
-		eventInfo += (setEventDate ? sdfDate.format(startTime) : notSet) + "\n";
+		eventInfo += getEventDate() + "\n";
 		eventInfo += Emoji.CLOCK_2 + " "; // add clock Emoji
-		eventInfo += (setStartTime ? sdfTime.format(startTime) : notSet) + " - ";
-		eventInfo += (setEndTime ? sdfTime.format(stopTime) : notSet) + " [Z+0]";
+		eventInfo += getStartTime() + " - ";
+		eventInfo += getStopTime() + " [Z+0]";
 		
 		eb.addField("Event Info:", eventInfo, false);
 		

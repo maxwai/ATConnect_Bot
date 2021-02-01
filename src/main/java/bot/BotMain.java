@@ -1,6 +1,7 @@
 package bot;
 
 import commands.Countdowns;
+import commands.Event;
 import commands.Timezones;
 import telegram.TelegramBots;
 import java.util.Map;
@@ -112,6 +113,7 @@ public class BotMain {
 		try {
 			jda.awaitReady(); // wait that the Bot is fully connected
 			Countdowns.restartCountdowns(jda);
+			Event.loadEvents(jda);
 			Guild guild = jda
 					.getGuildById(ROLES.get("Guild")); // get the Guild where the Bot is active
 			if (guild != null)
@@ -127,6 +129,7 @@ public class BotMain {
 	public static void disconnectBot() {
 		Countdowns.closeAllThreads(); // finish and save the Countdowns
 		Timezones.saveTimezones(); // save all User Timezones
+		Event.saveEvents(); // save all Events
 		jda.getRegisteredListeners().forEach(jda::removeEventListener);
 		jda.shutdown();
 	}

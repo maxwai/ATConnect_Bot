@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.RejectedExecutionException;
 import javax.annotation.Nonnull;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Emote;
@@ -28,29 +29,45 @@ public class Location {
 	/**
 	 * The Location Name
 	 */
-	final String location;
+	public final String location;
 	/**
 	 * The List of positions
 	 */
-	private final List<String> positions;
+	public final ArrayList<String> positions;
+	/**
+	 * The Users at that Location
+	 */
+	public final ArrayList<Long> users = new ArrayList<>();
+	/**
+	 * The Positions of the Users at that Location. Same order as {@link #users}
+	 */
+	public final ArrayList<String> userPositions = new ArrayList<>();
 	/**
 	 * The List of reactions in the same order as {@link #positions}.
 	 * <p>
 	 * The Reactions have two possible Classes: {@link String} or {@link Emote}
 	 */
-	private final ArrayList<Object> reactions;
+	private ArrayList<Object> reactions;
 	/**
 	 * The Event Instance of that Location
 	 */
-	private final EventInstance parent;
+	private EventInstance parent;
+	
 	/**
-	 * The Users at that Location
+	 * This is the constructor for when an Location is retrieved by the XML Parser
+	 *
+	 * @param location The Location Title
+	 * @param positions The Positions
+	 * @param users The Users in the positions
+	 * @param userPositions The Positions of the users
 	 */
-	private final ArrayList<Long> users = new ArrayList<>();
-	/**
-	 * The Positions of the Users at that Location. Same order as {@link #users}
-	 */
-	private final ArrayList<String> userPositions = new ArrayList<>();
+	public Location(@Nonnull String location, @Nonnull ArrayList<String> positions,
+			@Nonnull ArrayList<Long> users, @Nonnull ArrayList<String> userPositions) {
+		this.location = location;
+		this.positions = positions;
+		this.users.addAll(users);
+		this.userPositions.addAll(userPositions);
+	}
 	
 	
 	/**
@@ -66,7 +83,27 @@ public class Location {
 		this.location = location;
 		this.positions = positions;
 		this.parent = parent;
-		
+		getReactions(guild);
+	}
+	
+	/**
+	 * Updates the Guild and Parent Instance. This method is exclusively used when the Location was
+	 * created from the Config
+	 *
+	 * @param guild The Guild Instance
+	 * @param parent The Parent Instance
+	 */
+	void updateGuildAndParent(@Nonnull Guild guild, @Nonnull EventInstance parent) {
+		this.parent = parent;
+		getReactions(guild);
+	}
+	
+	/**
+	 * Retrieves the needed Reactions for this Location
+	 *
+	 * @param guild The Guild of the Event
+	 */
+	private void getReactions(@Nonnull Guild guild) {
 		reactions = new ArrayList<>(this.positions.size());
 		for (int i = 0; i < this.positions.size(); i++) {
 			List<Emote> emotes = guild.getEmotesByName(this.positions.get(i), true);
