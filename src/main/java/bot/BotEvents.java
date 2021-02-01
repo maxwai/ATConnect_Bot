@@ -20,6 +20,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.DisconnectEvent;
 import net.dv8tion.jda.api.events.ExceptionEvent;
@@ -27,6 +28,7 @@ import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.ReconnectedEvent;
 import net.dv8tion.jda.api.events.ResumedEvent;
 import net.dv8tion.jda.api.events.ShutdownEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
@@ -139,6 +141,41 @@ public class BotEvents {
 		logger.warn("Discord Bot is shutting down");
 	}
 	
+	/**
+	 * Is triggered when a Member leaves the Guild
+	 *
+	 * @param event Member leave Event
+	 */
+	@SubscribeEvent
+	public void onMemberLeave(GuildMemberRemoveEvent event) {
+		// only react it is from the setup Guild
+		if (event.getGuild().getIdLong() == BotMain.ROLES.get("Guild")) {
+			Member member = event.getMember();
+			String nickname = null;
+			if (member != null)
+				nickname = member.getNickname();
+			String userTag = event.getUser().getAsTag();
+			String message;
+			if (nickname == null)
+				message = userTag + " left the Server";
+			else
+				message = nickname + " left the Server. User Tag: " + userTag;
+			TextChannel channel = event.getGuild()
+					.getTextChannelById(BotMain.ROLES.get("SystemLogs"));
+			logger.warn(message);
+			if (channel != null) {
+				channel.sendMessage(message).queue();
+			} else {
+				logger.error("SystemLogs Channel ID not correct");
+			}
+		}
+	}
+	
+	/**
+	 * Is triggered when an Emote is added in a Private Chat (at least it is filtered that way)
+	 *
+	 * @param event Reaction add Event
+	 */
 	@SubscribeEvent
 	public void onPrivateEmoteAdded(MessageReactionAddEvent event) {
 		if (!event.isFromGuild()) {

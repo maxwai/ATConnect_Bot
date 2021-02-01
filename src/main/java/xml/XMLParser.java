@@ -60,6 +60,7 @@ public class XMLParser {
 	private static final String EVENT_ORGANIZER_TAG = "Event_Organizer";
 	private static final String INSTRUCTOR_TAG = "Instructor";
 	private static final String TRAINED_TAG = "Trained";
+	private static final String SYSTEM_LOG_TAG = "SystemLogs";
 	// End Roles
 	
 	// Timezones
@@ -150,6 +151,7 @@ public class XMLParser {
 					    <Event_Organizer><!--Put here the Role ID of the Event Organizers--></Event_Organizer>
 					    <Instructor><!--Put here the Role ID of the Instructors--></Instructor>
 					    <Trained><!--Put here the Role ID of the Trained Role--></Trained>
+					    <SystemLogs><!--Put here the Channel ID of the System Logs Channel-->></SystemLogs>
 					  </Roles>
 					  <Telegram> <!--Remove this Tag if you don't want a Telegram Bot to send you Logs-->
 					    <MainBot username=""><!--Put here the Main Telegram Bot Username-->
@@ -246,7 +248,7 @@ public class XMLParser {
 	}
 	
 	/**
-	 * Will retrieve the Role Information
+	 * Will retrieve the Role and Channel Information
 	 *
 	 * @return A Map with all the available Roles
 	 */
@@ -269,6 +271,8 @@ public class XMLParser {
 						.getElementsByTagName(INSTRUCTOR_TAG).item(0))));
 				output.put(TRAINED_TAG, Long.parseLong(readTextElement(element
 						.getElementsByTagName(TRAINED_TAG).item(0))));
+				output.put(SYSTEM_LOG_TAG, Long.parseLong(readTextElement(element
+						.getElementsByTagName(SYSTEM_LOG_TAG).item(0))));
 				logger.info("Getting the Roles");
 				return output;
 			} catch (NullPointerException e) {
@@ -687,7 +691,7 @@ public class XMLParser {
 			}
 		}
 		synchronized (commandsMessage) {
-			if(commandsMessage.get() == null) {
+			if (commandsMessage.get() == null) {
 				try {
 					commandsMessage.wait();
 				} catch (InterruptedException ignored) {
@@ -695,7 +699,7 @@ public class XMLParser {
 			}
 		}
 		synchronized (eventPrivateEmbedMessage) {
-			if(eventPrivateEmbedMessage.get() == null) {
+			if (eventPrivateEmbedMessage.get() == null) {
 				try {
 					eventPrivateEmbedMessage.wait();
 				} catch (InterruptedException ignored) {
@@ -703,7 +707,7 @@ public class XMLParser {
 			}
 		}
 		synchronized (eventEmbedMessage) {
-			if(eventEmbedMessage.get() == null) {
+			if (eventEmbedMessage.get() == null) {
 				try {
 					eventEmbedMessage.wait();
 				} catch (InterruptedException ignored) {
