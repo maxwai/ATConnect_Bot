@@ -13,6 +13,7 @@ import emoji.Emoji;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.RejectedExecutionException;
 import javax.annotation.Nullable;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -64,8 +65,12 @@ public class BotEvents {
 			} catch (InterruptedException ignored) {
 			}
 			// delete the Message after X sec
-			message.delete()
-					.queue(unused -> {}, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
+			try {
+				message.delete()
+						.queue(unused -> {},
+								new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
+			} catch (RejectedExecutionException ignored) {
+			}
 		}).start();
 	}
 	

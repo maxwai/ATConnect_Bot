@@ -259,9 +259,12 @@ public class Location {
 				}
 				// delete the Message after X sec
 				messages.remove(message.getIdLong());
-				message.delete()
-						.queue(unused -> {},
-								new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
+				try {
+					message.delete()
+							.queue(unused -> {},
+									new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
+				} catch (RejectedExecutionException ignored) {
+				}
 			}).start();
 		});
 	}
