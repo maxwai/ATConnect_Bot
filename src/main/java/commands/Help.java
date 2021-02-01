@@ -1,11 +1,11 @@
 package commands;
 
 import bot.BotEvents;
-import telegram.TelegramLogger;
 import java.awt.Color;
 import java.time.Instant;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import telegram.TelegramLogger;
 
 public class Help {
 	
@@ -21,18 +21,61 @@ public class Help {
 	 * @param isEventOrganizer If this User is an Event Organizer
 	 * @param isAdmin If this User is an Admin
 	 * @param channel The Channel where the Command was send
+	 * @param content The Content of the Message that was send.
 	 */
 	public static void showHelp(boolean isInstructor, boolean isEventOrganizer, boolean isAdmin,
-			MessageChannel channel) {
-		EmbedBuilder eb = getHelpPage(); // get the Basic Help Page
-		if (isInstructor)
-			getInstructorHelpPage(eb); // attach Instructor only commands
-		if (isEventOrganizer)
-			getEventOrganizerHelpPage(eb); // attach Event Organizer only commands
-		if (isAdmin)
-			getAdminHelpPage(eb); // attach Admin only commands
-		logger.info("Sending Help page");
+			MessageChannel channel, String content) {
+		if (content.contains("event")) {
+			if (isEventOrganizer) {
+				sendEventHelpPage(channel);
+			}
+		} else {
+			EmbedBuilder eb = getHelpPage(); // get the Basic Help Page
+			if (isInstructor)
+				getInstructorHelpPage(eb); // attach Instructor only commands
+			if (isEventOrganizer)
+				getEventOrganizerHelpPage(eb); // attach Event Organizer only commands
+			if (isAdmin)
+				getAdminHelpPage(eb); // attach Admin only commands
+			logger.info("Sending Help page");
+			channel.sendMessage(eb.build()).queue(BotEvents::addTrashcan);
+		}
+	}
+	
+	public static void sendEventHelpPage(MessageChannel channel) {
+		EmbedBuilder eb = getEventHelpPage();
+		logger.info("Sending Event Help Page");
 		channel.sendMessage(eb.build()).queue(BotEvents::addTrashcan);
+	}
+	
+	private static EmbedBuilder getBasicEmbedBuilder() {
+		EmbedBuilder eb = new EmbedBuilder();
+		
+		eb.setColor(Color.YELLOW);
+		eb.setTimestamp(Instant.now());
+		
+		return eb;
+	}
+	
+	private static EmbedBuilder getEventHelpPage() {
+		EmbedBuilder eb = getBasicEmbedBuilder();
+		
+		eb.setTitle("Event Commands:");
+		
+		eb.setDescription("List of some Event Commands");
+		
+		eb.addField("`!event create`", "Will begin the creation of a new event", true);
+		
+		eb.addField("`!event vote`", "Will toggle on/off the voting for the positions", true);
+		
+		eb.addField("`!event delete`", "Will delete your event", true);
+		
+		eb.addField("`!event move #<channel>`",
+				"Will move the event embed to the mentioned channel", true);
+		
+		eb.addField("`!event switch`", "To switch between Events", false);
+		
+		return eb;
 	}
 	
 	/**
@@ -41,9 +84,7 @@ public class Help {
 	 * @return The Basic Help Page, still needs to be Build
 	 */
 	private static EmbedBuilder getHelpPage() {
-		EmbedBuilder eb = new EmbedBuilder();
-		
-		eb.setColor(Color.YELLOW);
+		EmbedBuilder eb = getBasicEmbedBuilder();
 		
 		eb.setTitle("Commands:");
 		
@@ -61,8 +102,6 @@ public class Help {
 				Example layouts:
 				`!time User, User1`
 				`!time @User @User2`""", false);
-		
-		eb.setTimestamp(Instant.now());
 		
 		return eb;
 	}
@@ -109,6 +148,11 @@ public class Help {
 				Syntax:
 				`!countdown DD.MM.YYYY HH:mm <additional Text>`
 				The time is always in UTC""", false);
+		
+		eb.addField("`!help event`", "Will show the help page for event commands",
+				true);
+		
+		eb.addField("`!event create`", "Will begin the creation of a new event", true);
 	}
 	
 	/**
@@ -130,7 +174,7 @@ public class Help {
 		eb.addField("`!restart`", "restarts the bot", true);
 		
 		// This Command should not be shown since only the Owner can do it.
-		// eb.addField("!stop", "stops the bot", true);
+		//eb.addField("!stop", "stops the bot", true);
 		
 		eb.addField("`!reload XY`", """
 				reloads all config files
@@ -138,11 +182,11 @@ public class Help {
 				`config`, `timezones`""", true);
 		
 		// This Command should not be shown since only the Owner can do it.
-
-//        eb.addField("`!purge`", """
-//                purges the given amount of Messages from the channel not including the command.
-//                Layout:
-//                `!purge 10`
-//                `!purge all`""", true);
+		
+		//eb.addField("`!purge`", """
+		//		purges the given amount of Messages from the channel not including the command.
+		//		Layout:
+		//		`!purge 10`
+		//		`!purge all`""", true);
 	}
 }
