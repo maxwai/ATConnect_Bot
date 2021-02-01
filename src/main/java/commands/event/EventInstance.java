@@ -124,20 +124,14 @@ public class EventInstance {
 	public boolean vote = false;
 	/**
 	 * The Message Instance in the Guild with the Event Embed
-	 * <p>
-	 * TODO: check if messages are deleted
 	 */
 	public Message eventEmbedMessage;
 	/**
 	 * The Message Instance in the Private Chat where the Help page is shown
-	 * <p>
-	 * TODO: check if messages are deleted
 	 */
 	public Message commandsMessage;
 	/**
 	 * The Message Instance in the Private Chat with the Event Embed
-	 * <p>
-	 * TODO: check if messages are deleted
 	 */
 	public Message eventPrivateEmbedMessage;
 	/**
@@ -283,7 +277,8 @@ public class EventInstance {
 	 * Deletes this Event
 	 */
 	public void deleteEvent() {
-		eventEmbedMessage.delete().queue();
+		eventEmbedMessage.delete()
+				.queue(unused -> {}, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
 	}
 	
 	/**
@@ -436,7 +431,9 @@ public class EventInstance {
 								.sendMessage(getEventEmbed()) // send new Embed
 								.queue(message -> {
 									// delete old Event Embed message
-									eventEmbedMessage.delete().queue();
+									eventEmbedMessage.delete().queue(unused -> {},
+											new ErrorHandler()
+													.ignore(ErrorResponse.UNKNOWN_MESSAGE));
 									// save new channel
 									eventEmbedMessageChannel = mentionedChannels.get(0);
 									eventEmbedMessage = message;
@@ -480,7 +477,10 @@ public class EventInstance {
 				new ErrorHandler().handle(ErrorResponse.UNKNOWN_MESSAGE, e -> // in case deleted
 						eventEmbedMessageChannel.sendMessage(embed)
 								.queue(message -> eventEmbedMessage = message)));
-		eventPrivateEmbedMessage.editMessage(embed).queue(); // cannot be deleted
+		eventPrivateEmbedMessage.editMessage(embed).queue(unused -> {},
+				new ErrorHandler().handle(ErrorResponse.UNKNOWN_MESSAGE, e -> // in case deleted
+								eventPrivateEmbedMessage.getChannel().sendMessage(embed)
+										.queue(message -> eventPrivateEmbedMessage = message)));
 	}
 	
 	/**
