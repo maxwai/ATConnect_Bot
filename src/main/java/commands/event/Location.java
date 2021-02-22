@@ -17,8 +17,14 @@ import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.requests.ErrorResponse;
+import telegram.TelegramLogger;
 
 public class Location {
+	
+	/**
+	 * The Logger for Log Messages
+	 */
+	private static final TelegramLogger logger = TelegramLogger.getLogger("Event Location");
 	
 	/**
 	 * Hashmap with all active Messages to choose a position.
@@ -215,7 +221,8 @@ public class Location {
 	 * @param channel The Channel where the Embed should be send
 	 * @param user The User that made the request
 	 */
-	void postPositionEmbed(@Nonnull MessageChannel channel, @Nonnull User user) {
+	void postPositionEmbed(@Nonnull MessageChannel channel, @Nonnull MessageChannel privateChannel,
+			@Nonnull User user) {
 		EmbedBuilder eb = new EmbedBuilder();
 		
 		eb.setTitle("Choose your role " + user.getName() + " at " + location);
@@ -240,8 +247,9 @@ public class Location {
 		
 		parent.locations.forEach(location -> location.deleteEmbedIfExist(user.getIdLong()));
 		
+		logger.info("Sending Location chooser Embed to " + user.getName());
 		// send the message and add the Reactions for the positions
-		channel.sendMessage(eb.build()).queue(message -> {
+		privateChannel.sendMessage(eb.build()).queue(message -> {
 			for (Object reaction : reactions) {
 				if (reaction instanceof Emote)
 					message.addReaction((Emote) reaction).queue(unused -> {},
@@ -266,7 +274,8 @@ public class Location {
 				} catch (RejectedExecutionException ignored) {
 				}
 			}).start();
-		});
+		}, new ErrorHandler().handle(ErrorResponse.CANNOT_SEND_TO_USER,
+				e -> BotEvents.cannotSendPrivateMessage(channel, user)));
 	}
 	
 	/**

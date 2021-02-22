@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.RejectedExecutionException;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -52,6 +53,12 @@ public class BotEvents {
 	public static void addTrashcan(Message message) {
 		// add a reaction to make it easy to delete the post
 		message.addReaction(Emoji.WASTEBASKET).queue();
+	}
+	
+	public static void cannotSendPrivateMessage(@Nonnull MessageChannel channel, @Nonnull User user) {
+		logger.warn("Could not send private message to " + user.getName());
+		channel.sendMessage(user.getAsMention() + "couldn't send you a private message.")
+				.queue(message -> BotEvents.deleteMessageAfterXTime(message, 10));
 	}
 	
 	/**

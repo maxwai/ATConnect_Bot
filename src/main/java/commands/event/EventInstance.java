@@ -232,13 +232,17 @@ public class EventInstance {
 		// start a private chat
 		logger.info("Sending Private Message");
 		event.getAuthor().openPrivateChannel()
-				.queue(channel -> {
-					channel.sendMessage("We will continue the creation of the Event here:")
-							.queue();
-					channel.sendMessage(embed1).queue(message -> commandsMessage = message);
-					channel.sendMessage(embed)
-							.queue(message -> eventPrivateEmbedMessage = message);
-				});
+				.queue(channel -> channel.sendMessage("We will continue the creation of the Event here:")
+						.queue(ignored -> {
+									channel.sendMessage(embed1)
+											.queue(message -> commandsMessage = message);
+									channel.sendMessage(embed)
+											.queue(message -> eventPrivateEmbedMessage = message);
+								},
+								new ErrorHandler().handle(ErrorResponse.CANNOT_SEND_TO_USER,
+										e -> BotEvents
+												.cannotSendPrivateMessage(event.getChannel(),
+														event.getAuthor()))));
 		eventEmbedMessageChannel = event.getChannel();
 		// send the Event Embed
 		eventEmbedMessageChannel.sendMessage(embed)
@@ -479,8 +483,8 @@ public class EventInstance {
 								.queue(message -> eventEmbedMessage = message)));
 		eventPrivateEmbedMessage.editMessage(embed).queue(unused -> {},
 				new ErrorHandler().handle(ErrorResponse.UNKNOWN_MESSAGE, e -> // in case deleted
-								eventPrivateEmbedMessage.getChannel().sendMessage(embed)
-										.queue(message -> eventPrivateEmbedMessage = message)));
+						eventPrivateEmbedMessage.getChannel().sendMessage(embed)
+								.queue(message -> eventPrivateEmbedMessage = message)));
 	}
 	
 	/**
@@ -523,7 +527,8 @@ public class EventInstance {
 	 * @param emoji The Emoji of the Reaction
 	 * @param user The User that reacted
 	 */
-	public void assignLocation(@Nonnull String emoji, @Nonnull User user) {
+	public void assignLocation(@Nonnull MessageChannel channel, @Nonnull String emoji,
+			@Nonnull User user) {
 		Long userID = user.getIdLong();
 		if (vote) { // only do something if voting is on
 			switch (emoji) {
@@ -543,7 +548,7 @@ public class EventInstance {
 							Location tmpLocation = locations
 									.get(Emoji.numbersList.indexOf(emoji));
 							user.openPrivateChannel().queue(privateChannel ->
-									tmpLocation.postPositionEmbed(privateChannel, user));
+									tmpLocation.postPositionEmbed(channel, privateChannel, user));
 						} catch (IndexOutOfBoundsException ignored) { // emoji was no for a location
 						}
 					}

@@ -255,7 +255,7 @@ public class Event {
 								emoji.equals(Emoji.GREY_QUESTION) ||
 								emoji.equals(Emoji.X) ||
 								Emoji.numbersList.contains(emoji)) {
-							eventInstance.assignLocation(emoji, user);
+							eventInstance.assignLocation(channel, emoji, user);
 						} else if (emoji.equals(Emoji.WASTEBASKET)) { // We want to delete the Event
 							boolean isOwner = user.getIdLong() == BotMain.ROLES.get("Owner");
 							// Only event owner and bot Owner should be able to delete an event
