@@ -2,6 +2,9 @@ package telegram;
 
 import bot.BotMain;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -21,10 +24,14 @@ public class TelegramBots {
 	private static BotSession botSessionAll;
 	private static BotSession botSessionImportant;
 	private static String chatID;
+	private static List<List<Object>> queue = new ArrayList<>();
 	
 	public static void setupBots() {
 		ArrayList<String[]> infos = XMLParser.getTelegramBots();
-		if(infos == null) return; // no Telegram Bot available
+		if(infos == null) {
+			queue = null;
+			return; // no Telegram Bot available
+		}
 		String usernameAll = infos.get(0)[0];
 		String tokenAll = infos.get(0)[1];
 		String usernameImportant = infos.get(1)[0];
@@ -45,6 +52,17 @@ public class TelegramBots {
 			logger.error("The info in the Telegram Bot was not correct");
 			e.printStackTrace();
 		}
+		queue.forEach(objects -> {
+			String message = (String) objects.get(1);
+			if((int) objects.get(0) == 1) {
+				SendMessage sendMessage = new SendMessage(chatID, message);
+				sendMessage(botImportant, sendMessage);
+			}
+			SendMessage sendMessage = new SendMessage(chatID, message);
+			sendMessage(botAll, sendMessage);
+		});
+		queue.clear();
+		queue = null;
 	}
 	
 	public static void closeBots() {
@@ -64,6 +82,8 @@ public class TelegramBots {
 			
 			sendMessage = new SendMessage(chatID, message);
 			sendMessage(botAll, sendMessage);
+		} else if (queue != null) {
+			queue.add(Arrays.asList(1, message));
 		}
 	}
 	
@@ -73,6 +93,8 @@ public class TelegramBots {
 		if (chatID != null && botSessionImportant != null && botSessionAll != null) {
 			SendMessage sendMessage = new SendMessage(chatID, message);
 			sendMessage(botAll, sendMessage);
+		} else if (queue != null) {
+			queue.add(Arrays.asList(0, message));
 		}
 	}
 	
