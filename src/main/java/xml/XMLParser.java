@@ -470,6 +470,7 @@ public class XMLParser {
 		NodeList nList = getDocument().getElementsByTagName(EVENTS_TAG);
 		
 		if (nList.getLength() == 1) {
+			int events = 0;
 			try {
 				Element element = (Element) nList.item(0);
 				NodeList eventGroupList = element.getElementsByTagName(EVENT_GROUP_TAG);
@@ -484,12 +485,12 @@ public class XMLParser {
 					for (int j = 0; j < eventGroupChildren.getLength(); j++) {
 						Element eventGroupChild = (Element) eventGroupChildren.item(j);
 						if (eventGroupChild.getParentNode().equals(eventGroup)) {
-							logger.info(eventGroupChild.getNodeName());
 							switch (eventGroupChild.getNodeName()) {
 								case ACTIVE_EVENT_TAG -> eventList.set(0, Integer
 										.parseInt(readTextElement(eventGroupChild)));
 								case EVENT_TAG -> eventList.add(getEvent(jda, eventGroupChild));
 							}
+							events += eventList.size() - 1;
 						}
 					}
 					eventsMap.put(userID, eventList);
@@ -498,9 +499,9 @@ public class XMLParser {
 				logger.error("Could not retrieve all event. Number Format Exception");
 				System.exit(1);
 			}
-			
+			logger.info("Got the saved Events. Got " + events + " events");
 		} else
-			logger.info("Not Events to get");
+			logger.info("No Events to get");
 		
 		return eventsMap;
 	}
