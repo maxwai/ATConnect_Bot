@@ -300,7 +300,7 @@ public class BotEvents {
 						.restartBot(isAdmin, channel); // restarts the Bot connection
 				case "reload" -> Reload.reloadMain(isAdmin, event,
 						content); // reload the Config files or Timezones
-				case "purge" -> Purge.purgeMessages(isOwner, channel,
+				case "purge" -> Purge.purgeMessages(isOwner, event,
 						content); // purges X Messages from the channel
 				case "stop" -> BotStatus
 						.stopBot(isOwner, channel); // stops the Bot, this takes a while
