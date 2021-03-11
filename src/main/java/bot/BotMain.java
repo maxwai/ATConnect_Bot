@@ -62,6 +62,8 @@ public class BotMain {
 				.setEventManager(new AnnotatedEventManager())
 				// add the Event Listener Class
 				.addEventListeners(new BotEvents())
+				// add the Event Listener for Status Updates Class
+				.addEventListeners(new BotStatusEvents())
 				// set that the Bot is "listening to !help"
 				.setActivity(Activity.listening("!help"))
 				// disable the Presences and typing Intents since not used
