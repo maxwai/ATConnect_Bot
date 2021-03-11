@@ -34,17 +34,18 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.PrivateChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import telegram.TelegramLogger;
 
 public class XMLParser {
 	
-	private static final TelegramLogger logger = TelegramLogger.getLogger("XMLParser");
+	private static final Logger logger = LoggerFactory.getLogger("XMLParser");
 	
 	private static final String CONFIG_FILE_NAME = "Config.xml";
 	
@@ -945,52 +946,6 @@ public class XMLParser {
 		logger.info("Saving the Events");
 		writeDocument(doc);
 	}
-	
-	/*
-	 <Events>
-    <Event_Group ID="1354687613">
-      <active>1</active>
-      <Event>
-        <Guild>13548</Guild>
-        <Title>Title</Title>
-        <Description>Descriptions</Description>
-        <Times>
-          <EventDate>eventDate</EventDate>
-          <StartTime>startTime</StartTime>
-          <StopTime>stopTime</StopTime>
-        </Times>
-        <Toggles>
-          <Maybe>true</Maybe>
-          <Backup>true</Backup>
-          <Vote>false</Vote>
-        </Toggles>
-        <Messages>
-          <CommandMessage channel="135468">13548</CommandMessage>
-          <PrivateEmbedMessage channel="5464654">4654687</PrivateEmbedMessage>
-          <EventEmbed channel="515646">5654684</EventEmbed>
-        </Messages>
-        <MaybeUsers>
-          <User>13546</User>
-          <User>13546</User>
-        </MaybeUsers>
-        <BackupUsers>
-          <User>13546</User>
-          <User>13546</User>
-        </BackupUsers>
-        <Location name="location">
-          <Position>Test</Position>
-          <Position>Test</Position>
-          <User position="position reaction">13548</User>
-        </Location>
-        <Location name="location">
-          <Position>Test</Position>
-          <Position>Test</Position>
-          <User position="position reaction">13548</User>
-        </Location>
-      </Event>
-    </Event_Group>
-  </Events>
-	 */
 	
 	/**
 	 * Will clear a node of all it's child's

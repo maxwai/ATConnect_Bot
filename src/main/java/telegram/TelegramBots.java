@@ -2,6 +2,8 @@ package telegram;
 
 import bot.BotMain;
 import java.util.ArrayList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -13,7 +15,7 @@ import xml.XMLParser;
 
 public class TelegramBots {
 	
-	private static final TelegramLogger logger = TelegramLogger.getLogger("Telegram");
+	private static final Logger logger = LoggerFactory.getLogger("Telegram");
 	private static DiscordBotTelegramBot botAll;
 	private static DiscordBotTelegramBot botImportant;
 	private static BotSession botSessionAll;

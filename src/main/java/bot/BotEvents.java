@@ -37,12 +37,12 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import net.dv8tion.jda.api.requests.ErrorResponse;
-import telegram.TelegramBots;
-import telegram.TelegramLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BotEvents {
 	
-	private static final TelegramLogger logger = TelegramLogger.getLogger("BotStatus");
+	private static final Logger logger = LoggerFactory.getLogger("BotStatus");
 	private static Thread shutdownThread;
 	
 	/**
@@ -114,9 +114,7 @@ public class BotEvents {
 	
 	@SubscribeEvent
 	public void onException(ExceptionEvent event) {
-		if (event.isLogged()) {
-			TelegramBots.sendImportantLog(logger.getName(), "Error", event.getCause().getMessage());
-		} else {
+		if (!event.isLogged()) {
 			logger.error(event.getCause().getMessage());
 			event.getCause().printStackTrace();
 		}
@@ -195,7 +193,7 @@ public class BotEvents {
 					if (event.getReactionEmote().isEmoji()) {
 						String emoji = Emoji.getCleanedUpEmoji(event.getReactionEmote().getEmoji());
 						if (emoji.equals(Emoji.WASTEBASKET)) {
-							TelegramLogger.getLogger("ReactionAdded")
+							LoggerFactory.getLogger("ReactionAdded")
 									.info("deleting message because of :wastebasket: reaction");
 							message.delete().queue(); // delete the message
 						}
@@ -230,7 +228,7 @@ public class BotEvents {
 							String emoji = Emoji
 									.getCleanedUpEmoji(event.getReactionEmote().getEmoji());
 							if (emoji.equals(Emoji.WASTEBASKET)) {
-								TelegramLogger.getLogger("ReactionAdded")
+								LoggerFactory.getLogger("ReactionAdded")
 										.info("deleting message because of :wastebasket: reaction");
 								// check if this message was part of a Countdown
 								if (Countdowns.messageIds.contains(message.getId()))
@@ -258,7 +256,7 @@ public class BotEvents {
 			if (newNick.contains("[z") && !newNick.contains("[alt")) {
 				String newOffset = newNick.substring(newNick.indexOf("[z"));
 				String oldNick = event.getOldNickname();
-				TelegramLogger logger = TelegramLogger.getLogger("NicknameChanged");
+				Logger logger = LoggerFactory.getLogger("NicknameChanged");
 				if (oldNick != null) {
 					oldNick = oldNick.toLowerCase(Locale.ROOT);
 					String oldOffset = oldNick.substring(oldNick.indexOf("[z"));
@@ -287,7 +285,7 @@ public class BotEvents {
 	@SubscribeEvent
 	public void onReceiveMessage(MessageReceivedEvent event) {
 		if (event.getAuthor().isBot()) return;
-		TelegramLogger logger = TelegramLogger.getLogger("ReceivedMessage");
+		Logger logger = LoggerFactory.getLogger("ReceivedMessage");
 		String content = event.getMessage().getContentRaw().toLowerCase(Locale.ROOT);
 		MessageChannel channel = event.getChannel();
 		

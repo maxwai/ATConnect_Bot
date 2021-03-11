@@ -16,7 +16,8 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import telegram.TelegramLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xml.XMLParser;
 
 public class Timezones {
@@ -24,7 +25,7 @@ public class Timezones {
 	/**
 	 * The Logger for Log Messages
 	 */
-	private static final TelegramLogger logger = TelegramLogger.getLogger("Timezones");
+	private static final Logger logger = LoggerFactory.getLogger("Timezones");
 	/**
 	 * Date Format for how to output the local Time of a User
 	 */

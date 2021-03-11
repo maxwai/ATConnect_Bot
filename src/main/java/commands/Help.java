@@ -5,14 +5,15 @@ import java.awt.Color;
 import java.time.Instant;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import telegram.TelegramLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Help {
 	
 	/**
 	 * The Logger for Log Messages
 	 */
-	private static final TelegramLogger logger = TelegramLogger.getLogger("Help Command");
+	private static final Logger logger = LoggerFactory.getLogger("Help Command");
 	
 	/**
 	 * will show the Help Embed to the User

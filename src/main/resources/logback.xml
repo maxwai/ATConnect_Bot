@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="STDOUT" class="telegram.TelegramAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss} %boldCyan(%-34.-34thread) <!--%red(%10.10X{jda.shard})--> %boldGreen(%-15.-15logger{0}) %highlight(%-6level) %msg%n</pattern>
+            <pattern>%d{HH:mm:ss} %boldCyan(%-34.-34thread) %boldGreen(%-15.-15logger{0}) %highlight(%-6level) %replace(%msg){'\n', '\\n'}%n</pattern>
         </encoder>
     </appender>
 

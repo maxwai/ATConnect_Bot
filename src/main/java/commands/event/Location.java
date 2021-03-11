@@ -17,14 +17,15 @@ import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.requests.ErrorResponse;
-import telegram.TelegramLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Location {
 	
 	/**
 	 * The Logger for Log Messages
 	 */
-	private static final TelegramLogger logger = TelegramLogger.getLogger("Event Location");
+	private static final Logger logger = LoggerFactory.getLogger("Event Location");
 	
 	/**
 	 * Hashmap with all active Messages to choose a position.

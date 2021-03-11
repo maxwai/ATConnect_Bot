@@ -1,7 +1,8 @@
 package commands;
 
 import bot.BotEvents;
-import telegram.TelegramLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Stack;
@@ -25,7 +26,7 @@ public class Countdowns {
 	/**
 	 * The Logger for Log Messages
 	 */
-	private static final TelegramLogger logger = TelegramLogger.getLogger("Countdown");
+	private static final Logger logger = LoggerFactory.getLogger("Countdown");
 	/**
 	 * Date Format for the input of the Countdown
 	 */

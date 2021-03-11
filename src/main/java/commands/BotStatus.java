@@ -1,8 +1,9 @@
 package commands;
 
 import bot.BotMain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import telegram.TelegramBots;
-import telegram.TelegramLogger;
 import net.dv8tion.jda.api.entities.MessageChannel;
 
 public class BotStatus {
@@ -10,7 +11,7 @@ public class BotStatus {
 	/**
 	 * The Logger for Log Messages
 	 */
-	private static final TelegramLogger logger = TelegramLogger.getLogger("Bot Status");
+	private static final Logger logger = LoggerFactory.getLogger("Bot Status");
 	
 	/**
 	 * Will restart the bot Connection

@@ -2,7 +2,8 @@ package commands;
 
 import bot.BotEvents;
 import bot.BotMain;
-import telegram.TelegramLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.List;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -17,7 +18,7 @@ public class Trained {
 	/**
 	 * The Logger for Log Messages
 	 */
-	private static final TelegramLogger logger = TelegramLogger.getLogger("Trained Command");
+	private static final Logger logger = LoggerFactory.getLogger("Trained Command");
 	
 	/**
 	 * Will add the Role "Trained" to a User

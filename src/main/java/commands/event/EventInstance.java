@@ -23,7 +23,8 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.requests.ErrorResponse;
-import telegram.TelegramLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Internal Class that saves one Instance of an Event
@@ -50,7 +51,7 @@ public class EventInstance {
 	/**
 	 * The Logger for Log Messages
 	 */
-	private static final TelegramLogger logger = TelegramLogger.getLogger("Event Instance");
+	private static final Logger logger = LoggerFactory.getLogger("Event Instance");
 	/**
 	 * First Embed Help Page of creating the Event
 	 */

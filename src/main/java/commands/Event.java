@@ -22,7 +22,8 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.requests.ErrorResponse;
-import telegram.TelegramLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xml.XMLParser;
 
 public class Event {
@@ -39,7 +40,7 @@ public class Event {
 	/**
 	 * The Logger for Log Messages
 	 */
-	private static final TelegramLogger logger = TelegramLogger.getLogger("Event Command");
+	private static final Logger logger = LoggerFactory.getLogger("Event Command");
 	
 	/**
 	 * Hashmap with all active Messages to choose a Event.
