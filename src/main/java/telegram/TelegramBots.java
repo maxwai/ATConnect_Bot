@@ -3,8 +3,8 @@ package telegram;
 import bot.BotMain;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
-import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -25,6 +25,9 @@ public class TelegramBots {
 	private static BotSession botSessionImportant;
 	private static String chatID;
 	private static List<List<Object>> queue = new ArrayList<>();
+	private static long lastTelegramAPIError = new Date().getTime();
+	private static final long MIN_BETWEEN_TELEGRAM_ERROR = 1000 * 60 *  15;
+	private static final String TELEGRAM_API_ERROR_TEXT = "api.telegram.org:443 failed to respond";
 	
 	public static void setupBots() {
 		ArrayList<String[]> infos = XMLParser.getTelegramBots();
@@ -74,6 +77,11 @@ public class TelegramBots {
 	}
 	
 	public static void sendImportantLog(String clazz, String level, String message) {
+		if (message.equals(TELEGRAM_API_ERROR_TEXT)) {
+			if (new Date().getTime() - lastTelegramAPIError < MIN_BETWEEN_TELEGRAM_ERROR)
+				return;
+			lastTelegramAPIError = new Date().getTime();
+		}
 		message = level + "\n" + clazz + "\n\n" + message;
 		
 		if (chatID != null && botSessionImportant != null && botSessionAll != null) {
@@ -88,6 +96,8 @@ public class TelegramBots {
 	}
 	
 	static void sendLog(String clazz, String level, String message) {
+		if (message.equals(TELEGRAM_API_ERROR_TEXT))
+			return;
 		message = level + "\n" + clazz + "\n\n" + message;
 		
 		if (chatID != null && botSessionImportant != null && botSessionAll != null) {
