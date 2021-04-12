@@ -19,6 +19,10 @@ import xml.XMLParser;
 public class TelegramBots {
 	
 	private static final Logger logger = LoggerFactory.getLogger("Telegram");
+	private static final long MIN_BETWEEN_TELEGRAM_ERROR = 1000 * 60 * 15;
+	private static final String TELEGRAM_API_ERROR_TEXT = "api.telegram.org:443 failed to respond";
+	private static final String TELEGRAM_GATEWAY_ERROR_TEXT =
+			"{\"ok\":false,\"error_code\":502,\"description\":\"Bad Gateway\"}";
 	private static DiscordBotTelegramBot botAll;
 	private static DiscordBotTelegramBot botImportant;
 	private static BotSession botSessionAll;
@@ -26,12 +30,11 @@ public class TelegramBots {
 	private static String chatID;
 	private static List<List<Object>> queue = new ArrayList<>();
 	private static long lastTelegramAPIError = new Date().getTime();
-	private static final long MIN_BETWEEN_TELEGRAM_ERROR = 1000 * 60 *  15;
-	private static final String TELEGRAM_API_ERROR_TEXT = "api.telegram.org:443 failed to respond";
+	private static long lastTelegramGatewayError = new Date().getTime();
 	
 	public static void setupBots() {
 		ArrayList<String[]> infos = XMLParser.getTelegramBots();
-		if(infos == null) {
+		if (infos == null) {
 			queue = null;
 			return; // no Telegram Bot available
 		}
@@ -57,7 +60,7 @@ public class TelegramBots {
 		}
 		queue.forEach(objects -> {
 			String message = (String) objects.get(1);
-			if((int) objects.get(0) == 1) {
+			if ((int) objects.get(0) == 1) {
 				SendMessage sendMessage = new SendMessage(chatID, message);
 				sendMessage(botImportant, sendMessage);
 			}
@@ -70,9 +73,9 @@ public class TelegramBots {
 	
 	public static void closeBots() {
 		logger.info("Stopping all Telegram Bots");
-		if(botSessionAll != null)
+		if (botSessionAll != null)
 			botSessionAll.stop();
-		if(botSessionImportant != null)
+		if (botSessionImportant != null)
 			botSessionImportant.stop();
 	}
 	
@@ -81,6 +84,10 @@ public class TelegramBots {
 			if (new Date().getTime() - lastTelegramAPIError < MIN_BETWEEN_TELEGRAM_ERROR)
 				return;
 			lastTelegramAPIError = new Date().getTime();
+		} else if (message.equals(TELEGRAM_GATEWAY_ERROR_TEXT)) {
+			if (new Date().getTime() - lastTelegramGatewayError < MIN_BETWEEN_TELEGRAM_ERROR)
+				return;
+			lastTelegramGatewayError = new Date().getTime();
 		}
 		message = level + "\n" + clazz + "\n\n" + message;
 		
@@ -96,7 +103,7 @@ public class TelegramBots {
 	}
 	
 	static void sendLog(String clazz, String level, String message) {
-		if (message.equals(TELEGRAM_API_ERROR_TEXT))
+		if (message.equals(TELEGRAM_API_ERROR_TEXT) || message.equals(TELEGRAM_GATEWAY_ERROR_TEXT))
 			return;
 		message = level + "\n" + clazz + "\n\n" + message;
 		
