@@ -3,7 +3,6 @@ package telegram;
 import bot.BotMain;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +18,6 @@ import xml.XMLParser;
 public class TelegramBots {
 	
 	private static final Logger logger = LoggerFactory.getLogger("Telegram");
-	private static final long MIN_BETWEEN_TELEGRAM_ERROR = 1000 * 60 * 15;
 	private static final String TELEGRAM_API_ERROR_TEXT = "api.telegram.org:443 failed to respond";
 	private static final String TELEGRAM_GATEWAY_ERROR_TEXT =
 			"{\"ok\":false,\"error_code\":502,\"description\":\"Bad Gateway\"}";
@@ -29,8 +27,6 @@ public class TelegramBots {
 	private static BotSession botSessionImportant;
 	private static String chatID;
 	private static List<List<Object>> queue = new ArrayList<>();
-	private static long lastTelegramAPIError = new Date().getTime();
-	private static long lastTelegramGatewayError = new Date().getTime();
 	
 	public static void setupBots() {
 		ArrayList<String[]> infos = XMLParser.getTelegramBots();
@@ -80,15 +76,8 @@ public class TelegramBots {
 	}
 	
 	public static void sendImportantLog(String clazz, String level, String message) {
-		if (message.equals(TELEGRAM_API_ERROR_TEXT)) {
-			if (new Date().getTime() - lastTelegramAPIError < MIN_BETWEEN_TELEGRAM_ERROR)
+		if (message.equals(TELEGRAM_API_ERROR_TEXT) || message.equals(TELEGRAM_GATEWAY_ERROR_TEXT))
 				return;
-			lastTelegramAPIError = new Date().getTime();
-		} else if (message.equals(TELEGRAM_GATEWAY_ERROR_TEXT)) {
-			if (new Date().getTime() - lastTelegramGatewayError < MIN_BETWEEN_TELEGRAM_ERROR)
-				return;
-			lastTelegramGatewayError = new Date().getTime();
-		}
 		message = level + "\n" + clazz + "\n\n" + message;
 		
 		if (chatID != null && botSessionImportant != null && botSessionAll != null) {
